@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.aspectj.weaver.ast.Or;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Getter
 @Setter
@@ -13,7 +15,7 @@ public class Delivery {
     @GeneratedValue
     @Column(name = "delivery_id")
     private Long id;
-    @OneToOne(mappedBy = "delivery")  //연관관계 거울!
+    @OneToOne(mappedBy = "delivery",fetch = LAZY)  //연관관계 거울!
     private Order order;
     @Embedded
     private Address address;

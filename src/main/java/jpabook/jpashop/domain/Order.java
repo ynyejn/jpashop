@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Table(name = "orders")
 @Getter @Setter
@@ -16,14 +18,14 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    @ManyToOne  //오더랑 멤버는 다대일 관계..
+    @ManyToOne(fetch = LAZY)  //오더랑 멤버는 다대일 관계..
     @JoinColumn(name = "member_id") //맵핑을 뭘로할거냐 외래키이름이 member_id 얘가 "연관관계 주인"
     private Member member;
 
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = LAZY )
     @JoinColumn(name = "delivery_id")   //"연관관계 주인"
     private Delivery delivery;
 
