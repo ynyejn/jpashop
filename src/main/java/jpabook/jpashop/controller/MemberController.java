@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.naming.Binding;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -29,7 +30,7 @@ public class MemberController {
 
     @PostMapping("/members/new")    //Post로 넘어오면 이거탐
     public String create(@Valid MemberForm form, BindingResult result){ //바인딩리절트있으면 밸리데이션오류가 리절트에 담겨서 실행됨 튕기지않고..
-        //폼은따로 폼객체를 만들어서 하는게 좋음
+        //폼은따로 폼객체를 만들어서 하는게 좋음 실무에서! 엔티티는 최대한 순수하게 유지해야함. 시스템이 커져도 유지보수력이 좋아짐 엔티티는 화면을 위한로직은 없어야돼
         if(result.hasErrors()){
             return "members/createMemberForm";  //result를 가지고 화면으로감
         }
@@ -41,5 +42,11 @@ public class MemberController {
 
         memberService.join(member);
         return "redirect:/"; //첫번째페이지로 redirect
+    }
+    @GetMapping("/members")
+    public String list(Model model){
+        List<Member> members = memberService.findMembers();//실무시에는 DTO로 변환하여 화면에 꼭필요한것만 출력하는 것을 권장. API는 Entity절대반환하지마!
+        model.addAttribute("members",members);
+        return "members/memberList";
     }
 }
