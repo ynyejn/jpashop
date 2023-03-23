@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class Order {
     private OrderStatus status; //주문상태[ORDER, CANCEL]
 
     //======연관관계 편의 메소드======// 양방향일때 쓰면좋음
-    public void setMember(){    //order.setMember(member); 이런식으로만 해도 멤버에 오더리스트에 해당오더가 들어가는 편의메소드
+    public void setMember(Member member){    //order.setMember(member); 이런식으로만 해도 멤버에 오더리스트에 해당오더가 들어가는 편의메소드
         this.member = member;
         member.getOrders().add(this);
     }
@@ -49,6 +50,41 @@ public class Order {
         delivery.setOrder(this);
     }
 
-    //======연관관계 편의 메소드======//
+    //======생성 메소드======//
+    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems){
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for (OrderItem orderItem:orderItems){
+            order.addOrderItem(orderItem);
+        }
+        order.setStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
+    }
+
+    //======비즈니스로직======//
+    /**
+     * 주문 취소
+     */
+    public void cancel(){
+        if(delivery.getStatus()==DeliveryStatus.COMP){//배송완료
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불간으합니다.");
+        }
+        this.setStatus(OrderStatus.CANCEL);
+        for (OrderItem orderItem:orderItems){
+            orderItem.cancel();
+        }
+    }
+
+    //======조회로직======//
+    /**
+     * 전체 주문가격 조회
+     */
+    public int getTotalPrice(){
+        int totalPrice= orderItems.stream()
+                .mapToInt(OrderItem::getTotalPrice).sum();
+        return totalPrice;
+    }
 
 }
