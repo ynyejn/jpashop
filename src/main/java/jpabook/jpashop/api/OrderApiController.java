@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -52,6 +53,19 @@ public class OrderApiController {
 
         return result;
     }
+
+    @GetMapping("/api/v3.1/orders") //선생림은 이방식 굉장히선호
+    public List<OrderDto> orderV3_page(@RequestParam(value = "offset",defaultValue = "0") int offset,
+                                       @RequestParam(value = "limit",defaultValue = "100") int limit){
+        List<Order> orders= orderRepository.findAllWithMemberDelivery(offset,limit); //toOne만 fetch join
+        List<OrderDto> result = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
+
     @Getter
     static class OrderDto{      //dto안에 entity가 있으면안됨..entity의존을 완전히 끊어야함.
         private Long orderId;
