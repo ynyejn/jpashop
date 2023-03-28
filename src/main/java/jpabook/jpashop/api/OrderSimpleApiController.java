@@ -39,7 +39,7 @@ public class OrderSimpleApiController {
     }
 
     @GetMapping("/api/v2/simple-orders")
-    public List<SimpleOrderDto> orderV2(){  //엔티티를 DTO로 변환
+    public List<SimpleOrderDto> ordersV2(){  //엔티티를 DTO로 변환
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
         List<SimpleOrderDto> result = orders.stream()
                 .map(o -> new SimpleOrderDto(o)).
@@ -47,6 +47,15 @@ public class OrderSimpleApiController {
         //지연로딩이라서 총 쿼리 5번돔..성능 뱃..뭐 같은회원의 주문이면 영속성컨텍스트에서 가져오기땜에 하나정도는 줄수도..
         return result;
     }
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3(){ //페치 조인 최적화
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        List<SimpleOrderDto> result = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+        return result;
+    }
+
     @Data
     static class SimpleOrderDto{
         private Long orderId;
