@@ -96,4 +96,14 @@ public class OrderRepository {  //repository 는 가급적 순수한 entity를 �
                 " join fetch o.member m" +
                 " join fetch o.delivery d",Order.class).getResultList();
     }
+
+    public List<Order> findAllWithItem() {  //fetch join,, 단점 페이징불가능..1:다에서 fetch join쓰면..페이징안됨
+        return em.createQuery(
+                "select distinct o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i",Order.class
+        ).setFirstResult(1).setMaxResults(100).getResultList();
+    }
 }

@@ -43,7 +43,15 @@ public class OrderApiController {
 
         return result;
     }
+    @GetMapping("/api/v3/orders")//join fetch 단점 페이징불가능..1:다에서 fetch join쓰면..페이징안됨 일단 다 가져와서 메모리에서하기때문에 맛탱이..쓰지마!
+    public List<OrderDto> orderV3(){
+        List<Order> orders= orderRepository.findAllWithItem();
+        List<OrderDto> result = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
 
+        return result;
+    }
     @Getter
     static class OrderDto{      //dto안에 entity가 있으면안됨..entity의존을 완전히 끊어야함.
         private Long orderId;
