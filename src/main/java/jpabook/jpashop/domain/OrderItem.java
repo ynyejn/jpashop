@@ -1,5 +1,6 @@
 package jpabook.jpashop.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.item.Item;
 import lombok.AccessLevel;
@@ -23,6 +24,7 @@ public class OrderItem {
     @JoinColumn(name = "item_id")
     private Item item;
 
+    @JsonIgnore
     @ManyToOne(fetch = LAZY)  //다대일
     @JoinColumn(name = "order_id") //다에 외래키가 들어감
     private Order order;

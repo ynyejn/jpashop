@@ -1,5 +1,6 @@
 package jpabook.jpashop.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,7 @@ public class Delivery {
     @GeneratedValue
     @Column(name = "delivery_id")
     private Long id;
+    @JsonIgnore
     @OneToOne(mappedBy = "delivery",fetch = LAZY)  //연관관계 거울!
     private Order order;
     @Embedded

@@ -23,6 +23,7 @@ public class Member {
     @Embedded//내장타입을 포함했다.ManytoOne
     private Address address;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member")  //멤버의 입장에서 오더는 일대다 나는 맵핑된 거울일뿐이야~(mappedBy) 온리 조회용
     private List<Order> orders = new ArrayList<>(); //필드에서 바로 초기화 하는것이 안전하다. null문제에서 안전하다.그외에도..ManytoOne
 }
