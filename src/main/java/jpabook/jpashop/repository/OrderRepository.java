@@ -3,10 +3,10 @@ package jpabook.jpashop.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jpabook.jpashop.api.OrderSimpleApiController;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class OrderRepository {
+public class OrderRepository {  //repository 는 가급적 순수한 entity를 조회하는데 써야함
     private final EntityManager em;
 
     public void save(Order order){
@@ -96,6 +96,4 @@ public class OrderRepository {
                 " join fetch o.member m" +
                 " join fetch o.delivery d",Order.class).getResultList();
     }
-
-
 }
