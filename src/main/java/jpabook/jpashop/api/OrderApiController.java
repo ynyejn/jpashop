@@ -6,6 +6,7 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderFlatDto;
 import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import lombok.Data;
@@ -78,7 +79,11 @@ public class OrderApiController {
         return orderQueryRepository.findAllByDto_optimization();
     }
 
-
+    @GetMapping("/api/v6/orders")
+    public List<OrderFlatDto> ordersV6(){   //쿼리는하나지만 밸루임
+        //이렇게하면 orderItem기준으로 뻥튀기돼서 row가져옴..어케지지고볶으면 order기준으로 할수있음..pdf에있음..
+        return orderQueryRepository.findAllByDto_flat();
+    }
 
 
 

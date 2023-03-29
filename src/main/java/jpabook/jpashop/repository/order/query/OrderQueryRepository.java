@@ -14,7 +14,7 @@ public class OrderQueryRepository {
 
     private final EntityManager em;
 
-    public List<OrderQueryDto> findOrderQueryDtos(){
+    public List<OrderQueryDto> findOrderQueryDtos(){    //V4
         List<OrderQueryDto> result = findOrders();  //query1번 -> N개
         result.forEach(o -> {       //직접채움
             List<OrderItemQueryDto> orderItems = findOrderItems(o.getOrderId());
@@ -24,7 +24,7 @@ public class OrderQueryRepository {
         return result;
     }
 
-    public List<OrderQueryDto> findAllByDto_optimization() {    //query총2번, order, orderItem
+    public List<OrderQueryDto> findAllByDto_optimization() {   //V5 //query총2번, order, orderItem
         List<OrderQueryDto> result = findOrders();
 
         List<Long> orderIds = result.stream().map(o -> o.getOrderId()).collect(Collectors.toList());    //orderId 리스트
@@ -68,4 +68,15 @@ public class OrderQueryRepository {
     }
 
 
+    public List<OrderFlatDto> findAllByDto_flat() {    //V6
+        return em.createQuery(
+                "select new " +
+                        "jpabook.jpashop.repository.order.query.OrderFlatDto(o.id,m.name,o.orderDate,o.status,d.address,i.name,oi.orderPrice,oi.count)" +
+                        " from Order o" +
+                        " join o.member m" +
+                        " join o.delivery d" +
+                        " join o.orderItems oi" +
+                        " join oi.item i", OrderFlatDto.class
+        ).getResultList();
+    }
 }
