@@ -73,6 +73,14 @@ public class OrderApiController {
         return orderQueryRepository.findOrderQueryDtos();
     }
 
+    @GetMapping("/api/v5/orders")
+    public List<OrderQueryDto> ordersV5(){
+        return orderQueryRepository.findAllByDto_optimization();
+    }
+
+
+
+
 
     @Getter
     static class OrderDto{      //dto안에 entity가 있으면안됨..entity의존을 완전히 끊어야함.
