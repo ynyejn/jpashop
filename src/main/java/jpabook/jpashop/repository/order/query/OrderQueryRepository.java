@@ -24,7 +24,7 @@ public class OrderQueryRepository {
         return result;
     }
 
-    public List<OrderQueryDto> findAllByDto_optimization() {   //V5 //query총2번, order, orderItem
+    public List<OrderQueryDto> findAllByDto_optimization() {   //V5 //query총2번, order, orderItem/ in절 사용
         List<OrderQueryDto> result = findOrders();
 
         List<Long> orderIds = result.stream().map(o -> o.getOrderId()).collect(Collectors.toList());    //orderId 리스트
