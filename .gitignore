@@ -1,10 +1,14 @@
 HELP.md
 .gradle
 build/
+generated/
 !gradle/wrapper/gradle-wrapper.jar
+!**/src/main/generated/
+!**/src/test/generated/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+src/main/generated/
+src/test/generated/
 ### STS ###
 .apt_generated
 .classpath

@@ -67,7 +67,8 @@ public class OrderService {
 
     //검색
     public List<Order> searchOrder(OrderSearch orderSearch){
-        List<Order> orders = orderRepository.findAllByString(orderSearch);
+//        List<Order> orders = orderRepository.findAllByString(orderSearch);
+        List<Order> orders = orderRepository.findAll(orderSearch);
         return orders;
     }
 
