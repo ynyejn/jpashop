@@ -38,7 +38,7 @@ public class MemberServiceTest {
         em.flush(); //쿼리 보고싶으면 이거 해주면댐 하지만 Transactional이 테스트는 자동으로 롤백해주기따문에 데이터는 볼수X
 
         //then
-        assertEquals(member, memberRepository.findOne(saveId));
+        assertEquals(member, memberRepository.findById(saveId));
     }
 
     @Test(expected = IllegalStateException.class)//이 예외가 나오면 녹색불 테스트성공
