@@ -20,6 +20,10 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "ACCOUNT_CODE",referencedColumnName = "ACCOUNT_CODE")
+    private Account account;
+
     @ManyToOne(fetch = LAZY)  //오더랑 멤버는 다대일 관계..
     @JoinColumn(name = "member_id") //맵핑을 뭘로할거냐 외래키이름이 member_id 얘가 "연관관계 주인"
     private Member member;
@@ -54,8 +58,9 @@ public class Order {
     }
 
     //======생성 메소드======//
-    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems){
+    public static Order createOrder(Account account, Member member, Delivery delivery, OrderItem... orderItems){
         Order order = new Order();
+        order.setAccount(account);
         order.setMember(member);
         order.setDelivery(delivery);
         for (OrderItem orderItem:orderItems){

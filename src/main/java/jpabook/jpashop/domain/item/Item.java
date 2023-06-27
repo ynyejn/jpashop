@@ -5,6 +5,8 @@ import jpabook.jpashop.domain.Category;
 import jpabook.jpashop.exception.NotEnoughStockException;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +16,13 @@ import java.util.List;
 @DiscriminatorColumn(name = "dtype")//타입구분
 @Getter @Setter
 public abstract class Item {
-
     @Id
     @GeneratedValue
     @Column(name = "item_id")
     private Long id;
 
+    @Column(name = "PRODUCT_CODE")
+    private String productCode;
     private String name;
     private int price;
     private int stockQuantity;

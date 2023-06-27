@@ -27,6 +27,7 @@
             <thead>
             <tr>
                 <th>#</th>
+                <th>매장명</th>
                 <th>회원명</th>
                 <th>대표상품 이름</th>
                 <th>대표상품 주문가격</th>
@@ -39,6 +40,7 @@
             <tbody>
             <tr th:each="item : ${orders}">
                 <td th:text="${item.id}"></td>
+                <td th:text="${item.account.name}"></td>
                 <td th:text="${item.member.name}"></td>
                 <td th:text="${item.orderItems[0].item.name}"></td>
                 <td th:text="${item.orderItems[0].orderPrice}"></td>

@@ -1,14 +1,8 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.domain.Delivery;
-import jpabook.jpashop.domain.Member;
-import jpabook.jpashop.domain.Order;
-import jpabook.jpashop.domain.OrderItem;
+import jpabook.jpashop.domain.*;
 import jpabook.jpashop.domain.item.Item;
-import jpabook.jpashop.repository.ItemRepository;
-import jpabook.jpashop.repository.MemberRepository;
-import jpabook.jpashop.repository.OrderRepository;
-import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
@@ -24,16 +18,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
+    private final AccountRepository accountRepository;
 
     /**
      * 주문
      */
     @Transactional
-    public Long order(Long memberId, Long itemId, int count){
+    public Long order(String accountCode, Long memberId, Long itemId, int count){
 
         //엔티티조회
         Member member = memberRepository.findById(memberId).get();
         Item item = itemRepository.findOne(itemId);
+        Account account = accountRepository.findByAccountCode(accountCode);
 
         //배송정보 설정
         Delivery delivery = new Delivery();
@@ -47,7 +43,7 @@ public class OrderService {
         OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), count);//예시는 오더아이템하나만 넘길수있도록만듬
 
         //주문생성
-        Order order = Order.createOrder(member, delivery, orderItem);
+        Order order = Order.createOrder(account,member, delivery, orderItem);
 
         //주문저장
         orderRepository.save(order);
