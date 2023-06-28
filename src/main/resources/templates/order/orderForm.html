@@ -6,9 +6,9 @@
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <form role="form" action="/order" method="post">
         <div class="form-group">
-            <label for="account">주문매장</label>
+            <label for="account">주문채널</label>
             <select name="accountCode" id="account" class="form-control">
-                <option value="">회원선택</option>
+                <option value="">채널선택</option>
                 <option th:each="account : ${accounts}"
                         th:value="${account.accountCode}"
                         th:text="${account.name}" />

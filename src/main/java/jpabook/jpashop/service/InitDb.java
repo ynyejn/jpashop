@@ -80,7 +80,7 @@ public class InitDb {
             Book book = new Book();
             book.setName(name);
             book.setPrice(price);
-            book.setStockQuantity(stockQuantity);
+//            book.setStockQuantity(stockQuantity);
             book.setProductCode(sapCode);
             return book;
         }
@@ -94,7 +94,7 @@ public class InitDb {
             SapStock sapStock = new SapStock();
             sapStock.setItem(item);
             sapStock.setStock(stock);
-            System.out.println(sapStock.getItem().getProductCode());
+            sapStock.setDistributionFlag(0);
             return sapStock;
         }
         private Account createAccount(String sapcode, String name){

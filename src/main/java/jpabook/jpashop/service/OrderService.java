@@ -2,6 +2,9 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.*;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.domain.stock.ChannelStock;
+import jpabook.jpashop.dto.ResultResDataDto;
+import jpabook.jpashop.exception.NotEnoughStockException;
 import jpabook.jpashop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Or;
@@ -19,6 +22,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
     private final AccountRepository accountRepository;
+    private final StockService stockService;
 
     /**
      * 주문
@@ -30,6 +34,11 @@ public class OrderService {
         Member member = memberRepository.findById(memberId).get();
         Item item = itemRepository.findOne(itemId);
         Account account = accountRepository.findByAccountCode(accountCode);
+
+        //재고확인
+        if(!stockService.checkStock(account.getAccountCode(),item.getProductCode(),count)){
+             throw new NotEnoughStockException("해당매장에 재고가 부족합니다.");
+        }
 
         //배송정보 설정
         Delivery delivery = new Delivery();
@@ -68,4 +77,11 @@ public class OrderService {
         return orders;
     }
 
+
+    @Transactional
+    public ResultResDataDto fixOrder(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        order.setStatus(OrderStatus.ORDER_FIX);
+        return stockService.fixStock(order);
+    }
 }

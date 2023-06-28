@@ -9,13 +9,13 @@ import lombok.Setter;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
-@Table(name = "ECOM_STOCK")
+@Table(name = "CHANNEL_STOCK")
 @Getter
 @Setter
-public class EcomStock {
+public class ChannelStock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ES_IDX")
+    @Column(name = "CS_IDX")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ACCOUNT_CODE",referencedColumnName = "ACCOUNT_CODE")

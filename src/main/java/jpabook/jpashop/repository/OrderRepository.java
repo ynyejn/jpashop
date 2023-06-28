@@ -100,12 +100,14 @@ public class OrderRepository {  //repository 는 가급적 순수한 entity를 �
         JPAQueryFactory query = new JPAQueryFactory(em);
         QOrder order = QOrder.order;
         QMember member = QMember.member;
+        QAccount account = QAccount.account;
 
         //jpql로 바뀌어서 실행됨 자동으로
         return query
                 .select(order)
                 .from(order)
                 .join(order.member , member)
+                .join(order.account, account)
                 .where(statusEq(orderSearch.getOrderStatus()), nameLike(orderSearch.getMemberName()))
                 .limit(1000)
                 .fetch();

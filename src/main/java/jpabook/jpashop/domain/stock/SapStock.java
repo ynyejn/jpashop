@@ -25,5 +25,8 @@ public class SapStock {
     @Column(name = "STOCK")
     private int stock;
 
+    @Column(name = "DISTRIBUTION_FLAG")
+    private int distributionFlag;
+
 
 }

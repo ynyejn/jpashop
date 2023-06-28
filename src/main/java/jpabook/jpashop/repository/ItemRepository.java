@@ -32,4 +32,5 @@ public class ItemRepository {
         return em.createQuery("select i from Item i",Item.class).getResultList();//jpql 객체를 대상으로 쿼리돌림
     }
 
+
 }

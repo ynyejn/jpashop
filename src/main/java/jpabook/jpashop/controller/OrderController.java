@@ -4,6 +4,7 @@ import jpabook.jpashop.domain.Account;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.repository.OrderSearch;
 import jpabook.jpashop.service.AccountService;
 import jpabook.jpashop.service.ItemService;
@@ -62,6 +63,11 @@ public class OrderController {
     private String cancelOrder(@PathVariable("orderId") Long orderId){
         orderService.cancelOrder(orderId);
         return "redirect:/orders";
+    }
+    @PostMapping("/order/{orderId}/fix")
+    @ResponseBody
+    private ResultResDataDto fixOrder(@PathVariable("orderId") Long orderId){
+        return orderService.fixOrder(orderId);
     }
 
 }

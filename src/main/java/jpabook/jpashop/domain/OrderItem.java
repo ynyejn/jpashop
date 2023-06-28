@@ -21,7 +21,7 @@ public class OrderItem {
     private Long id;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "PRODUCT_CODE",referencedColumnName = "PRODUCT_CODE")
     private Item item;
 
     @JsonIgnore
@@ -41,13 +41,14 @@ public class OrderItem {
         orderItem.setOrderPrice(orderPrice);
         orderItem.setCount(count);
 
-        item.removeStock(count);    //아이템 재고제거
+//        item.removeStock(count);    //아이템 재고제거
         return orderItem;
     }
 
     //비즈니스로직
     public void cancel() {
-        getItem().addStock(count);
+
+//        getItem().addStock(count);
     }
 
     //조회로직

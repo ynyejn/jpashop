@@ -5,14 +5,18 @@
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <div>
+        <span>미분배 재고: <span th:text="${sapStock}"></span></span>
+        <a class="btn btn-sm btn-info float-right ml-1" href="javascript:void(0);" onclick="distributeStock();">재고분배</a>
+        <a class="btn btn-sm btn-primary float-right" href="javascript:void(0);" onclick="redistributeStock();">재고 재분배</a>
         <table class="table table-striped">
             <thead>
             <tr>
                 <th>#</th>
                 <th>매장명</th>
                 <th>상품명</th>
+                <th>상태</th>
                 <th>재고수량</th>
-                <th></th>
+<!--                <th></th>-->
             </tr>
             </thead>
             <tbody>
@@ -20,11 +24,12 @@
                 <td th:text="${item.id}"></td>
                 <td th:text="${item.account.name}"></td>
                 <td th:text="${item.item.name}"></td>
+                <td th:text="${item.status}"></td>
                 <td th:text="${item.stock}"></td>
-                <td>
-                    <a href="#" th:href="@{/items/{id}/edit (id=${item.id})}"
-                       class="btn btn-primary" role="button">수정</a>
-                </td>
+<!--                <td>-->
+<!--                    <a href="#" th:href="@{/items/{id}/edit (id=${item.id})}"-->
+<!--                       class="btn btn-primary" role="button">수정</a>-->
+<!--                </td>-->
             </tr>
             </tbody>
         </table>
@@ -32,4 +37,36 @@
     <div th:replace="fragments/footer :: footer"/>
 </div> <!-- /container -->
 </body>
+<script>
+    function distributeStock(){
+        $.ajax({
+            type: "POST",
+            url: "/stock/distribute"
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert("에러발생")
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
+    function redistributeStock(){
+        $.ajax({
+            type: "POST",
+            url: "/stock/redistribute"
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert("에러발생")
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
+</script>
 </html>

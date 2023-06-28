@@ -2,6 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.repository.ItemJpaRepository;
 import jpabook.jpashop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final ItemJpaRepository itemJpaRepository;
 
     @Transactional
     public void saveItem(Item item){
@@ -38,4 +40,7 @@ public class ItemService {
         return itemRepository.findOne(id);
     }
 
+    public Item findByProductCode(String productCode) {
+        return itemJpaRepository.findByProductCode(productCode);
+    }
 }
