@@ -4,14 +4,17 @@ import jpabook.jpashop.domain.Account;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.stock.ChannelStock;
+import jpabook.jpashop.domain.stock.ChannelStockList;
 import jpabook.jpashop.domain.stock.DistributionRate;
 import jpabook.jpashop.domain.stock.SapStock;
 import jpabook.jpashop.dto.ProductStockDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.repository.DistributionRateRepository;
 import jpabook.jpashop.repository.SapStockRepository;
+import jpabook.jpashop.repository.StockListRepository;
 import jpabook.jpashop.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +27,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StockService {
     private final StockRepository stockRepository;
+    private final StockListRepository stockListRepository;
     private final SapStockRepository sapStockRepository;
     private final DistributionRateRepository distributionRateRepository;
     private final ItemService itemService;
+    private final RedisTemplate<String,String> redisTemplate;
+
 
     public List<ChannelStock> findStocks() {
         return stockRepository.findAll();
@@ -49,9 +55,9 @@ public class StockService {
                     Account account = distributionRate.getAccount();
                     int stock = allStock * distributionRate.getRate() / 100;
                     ChannelStock channelStock = new ChannelStock();
-                    channelStock.setStock(stock);
+//                    channelStock.setStock(stock);
                     channelStock.setItem(product);
-                    channelStock.setAccount(account);
+//                    channelStock.setAccount(account);
                     channelStock.setStatus("가용재고");
                     stockRepository.save(channelStock);
                 }
@@ -74,20 +80,20 @@ public class StockService {
             List<DistributionRate> distributionRateList = distributionRateRepository.findAll();
 
             if (sapStocks.isEmpty()) {
-                List<ProductStockDto> stockDtos = stockRepository.findAllStockGroupByProduct()
-                        .stream().map(s->ProductStockDto.builder()
-                                .productCode(s.getProductCode())
-                                .stock(s.getStock()).build()).collect(Collectors.toList());
-                for (ProductStockDto stockDto : stockDtos) {
-                    int allStock = stockDto.getStock();
-                    Item product = itemService.findByProductCode(stockDto.getProductCode());
-                    for (DistributionRate distributionRate : distributionRateList) {
-                        Account account = distributionRate.getAccount();
-                        int stock = allStock * distributionRate.getRate() / 100;
-                        ChannelStock channelStock = stockRepository.findByItemAndAccountAndStatus(product,account,"가용재고");
-                        channelStock.setStock(stock);
-                    }
-                }
+//                List<ProductStockDto> stockDtos = stockRepository.findAllStockGroupByProduct()
+//                        .stream().map(s->ProductStockDto.builder()
+//                                .productCode(s.getProductCode())
+//                                .stock(s.getStock()).build()).collect(Collectors.toList());
+//                for (ProductStockDto stockDto : stockDtos) {
+//                    int allStock = stockDto.getStock();
+//                    Item product = itemService.findByProductCode(stockDto.getProductCode());
+//                    for (DistributionRate distributionRate : distributionRateList) {
+//                        Account account = distributionRate.getAccount();
+//                        int stock = allStock * distributionRate.getRate() / 100;
+//                        ChannelStock channelStock = stockRepository.findByItemAndAccountAndStatus(product,account,"가용재고");
+////                        channelStock.setStock(stock);
+//                    }
+//                }
 
             }
 
@@ -100,35 +106,41 @@ public class StockService {
     }
 
     public boolean checkStock(String accountCode, String productCode, int count) {
-        Optional<ChannelStock> channelStock = stockRepository.checkStock(accountCode, productCode, count);
-        if (channelStock.isEmpty()) {
+//        Optional<ChannelStock> channelStock = stockRepository.checkStock(accountCode, productCode, count);
+//        if (channelStock.isEmpty()) {
             return false;
-        } else {
-            return true;
-        }
+//        } else {
+//            ChannelStock channelStock1 = channelStock.get();
+//            int allStock  = channelStock1.getStock();
+//            return true;
+//        }
     }
 
     @Transactional
     public ResultResDataDto fixStock(Order order) {
         try {
-            Optional<ChannelStock> channelStock = stockRepository.checkStock(order.getAccount().getAccountCode(), order.getOrderItems().get(0).getItem().getProductCode(), order.getOrderItems().get(0).getCount());
+            Optional<ChannelStockList> channelStock = stockListRepository.checkStock(order.getAccount().getAccountCode(), order.getOrderItems().get(0).getItem().getProductCode(), order.getOrderItems().get(0).getCount());
             if (!channelStock.isEmpty()) {
-                ChannelStock channelStock1 = channelStock.get();
-                channelStock1.setStock(channelStock1.getStock() - order.getOrderItems().get(0).getCount());
+                ChannelStockList channelStock1 = channelStock.get();
+//                channelStock1.setStock(channelStock1.getStock() - order.getOrderItems().get(0).getCount());
 
                 Item product = order.getOrderItems().get(0).getItem();
                 Account account = order.getAccount();
-                ChannelStock newStock = stockRepository.findByItemAndAccountAndStatus(product,account,"홀딩");
+//                ChannelStock newStock = stockRepository.findByItemAndAccountAndStatus(product,account,"홀딩");
+                ChannelStock newStock = stockRepository.findById(1L).get();
                 if(newStock==null){
                     newStock = new ChannelStock();
-                    newStock.setStock(order.getOrderItems().get(0).getCount());
+//                    newStock.setStock(order.getOrderItems().get(0).getCount());
                     newStock.setStatus("홀딩");
                     newStock.setItem(product);
-                    newStock.setAccount(account);
+//                    newStock.setAccount(account);
                 }else{
-                    newStock.setStock(newStock.getStock()+order.getOrderItems().get(0).getCount());
+//                    newStock.setStock(newStock.getStock()+order.getOrderItems().get(0).getCount());
                 }
                 stockRepository.save(newStock);
+
+                addOnRedis("test", String.valueOf(order.getId()));
+                System.out.println(totalUsedCount("test"));
             } else {
                 return ResultResDataDto.fromResMsg(false, "재고가 없어ㅆ");
             }
@@ -139,4 +151,15 @@ public class StockService {
 
         }
     }
+
+    public Long totalUsedCount(String key){
+        return redisTemplate.opsForSet().size(key);
+    }
+    public void addOnRedis(String key,String value){
+        Long addSiz = redisTemplate.opsForSet().add(key, value);
+    }
+    private String generateKey(Long key){
+        return key.toString();
+    }
+
 }

@@ -12,7 +12,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "A_IDX")
     private Long id;
-    @Column(name = "ACCOUNT_CODE")
+    @Column(name = "ACCOUNT_CODE",nullable = false,unique = true)
     private String accountCode;
     private String name;
 }

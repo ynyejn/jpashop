@@ -21,7 +21,7 @@ public abstract class Item {
     @Column(name = "item_id")
     private Long id;
 
-    @Column(name = "PRODUCT_CODE")
+    @Column(name = "PRODUCT_CODE",nullable = false,unique = true)
     private String productCode;
     private String name;
     private int price;
