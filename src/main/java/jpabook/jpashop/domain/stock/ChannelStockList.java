@@ -21,6 +21,11 @@ public class ChannelStockList {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "CS_IDX")
     private ChannelStock channelStock;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "SS_IDX")
+    private SapStock sapStock;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ACCOUNT_CODE",referencedColumnName = "ACCOUNT_CODE")
     private Account account;
@@ -29,7 +34,7 @@ public class ChannelStockList {
     @JoinColumn(name = "PRODUCT_CODE",referencedColumnName = "PRODUCT_CODE")
     private Item item;
 
-    private int qty;
+    private Long qty;
 
 
 }

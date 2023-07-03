@@ -21,7 +21,7 @@ public class ChannelStock {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "PRODUCT_CODE",referencedColumnName = "PRODUCT_CODE")
     private Item item;
-    private int totalQty;
+    private Long totalQty;
     private String status;
     private String redistributionFlag;
 

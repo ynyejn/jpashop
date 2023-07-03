@@ -1,6 +1,8 @@
 package jpabook.jpashop.controller;
 
 import jpabook.jpashop.domain.stock.ChannelStock;
+import jpabook.jpashop.domain.stock.ChannelStockList;
+import jpabook.jpashop.dto.ChannelStockListDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.service.StockService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ public class StockController {
     private final StockService stockService;
     @GetMapping("/stocks")
     public String stockList(Model model){
-        List<ChannelStock> stocks = stockService.findStocks();
+        List<ChannelStockListDto> stocks = stockService.findStocks();
         int sapStock = stockService.getSapStock();
         model.addAttribute("sapStock",sapStock);
         model.addAttribute("stocks",stocks);

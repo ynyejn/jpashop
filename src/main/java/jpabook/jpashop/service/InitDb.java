@@ -42,16 +42,16 @@ public class InitDb {
 
             Member member = createMember("userA", "서울", "1", "1111");
             em.persist(member);
-            Book book1 = createBook("lang-01", 10000, 100,"11000405");
+            Book book1 = createBook("lang-01", 10000, 100L,"11000405");
             em.persist(book1);
-            Book book2 = createBook("mantu-01", 20000, 100,"11000123");
+            Book book2 = createBook("mantu-01", 20000, 100L,"11000123");
             em.persist(book2);
             OrderItem orderItem1 = OrderItem.createOrderItem(book1, 10000, 1);
             OrderItem orderItem2 = OrderItem.createOrderItem(book2, 20000, 2);
             Order order = Order.createOrder(account,member, createDelivery(member), orderItem1, orderItem2);
             em.persist(order);
-            SapStock sapStock = createSapStock(book1,100);//lang-01
-            SapStock sapStock2 = createSapStock(book2,100);//mantu-01
+            SapStock sapStock = createSapStock(book1,100L);//lang-01
+            SapStock sapStock2 = createSapStock(book2,100L);//mantu-01
             em.persist(sapStock);
             em.persist(sapStock2);
         }
@@ -76,7 +76,7 @@ public class InitDb {
             return member;
         }
 
-        private Book createBook(String name, int price, int stockQuantity,String sapCode) {
+        private Book createBook(String name, int price, Long stockQuantity,String sapCode) {
             Book book = new Book();
             book.setName(name);
             book.setPrice(price);
@@ -90,7 +90,7 @@ public class InitDb {
             delivery.setAddress(member.getAddress());
             return delivery;
         }
-        private SapStock createSapStock(Item item, int stock){
+        private SapStock createSapStock(Item item, Long stock){
             SapStock sapStock = new SapStock();
             sapStock.setItem(item);
             sapStock.setStock(stock);

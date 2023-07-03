@@ -23,7 +23,7 @@ public class SapStock {
 
 
     @Column(name = "STOCK")
-    private int stock;
+    private Long stock;
 
     @Column(name = "DISTRIBUTION_FLAG")
     private int distributionFlag;
