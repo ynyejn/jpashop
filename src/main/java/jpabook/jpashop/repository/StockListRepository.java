@@ -1,9 +1,11 @@
 package jpabook.jpashop.repository;
 
+import jakarta.persistence.LockModeType;
 import jpabook.jpashop.domain.stock.ChannelStock;
 import jpabook.jpashop.domain.stock.ChannelStockList;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,7 +15,7 @@ import java.util.Optional;
 public interface StockListRepository extends JpaRepository<ChannelStockList,Long> {
 
     @Override
-    @EntityGraph(attributePaths = {"channelStock"})
+    @EntityGraph(attributePaths = {"channelStock","account"})
     List<ChannelStockList> findAll();
     @Query("select csl from ChannelStockList csl " +
             " join csl.channelStock cs " +
@@ -31,6 +33,9 @@ public interface StockListRepository extends JpaRepository<ChannelStockList,Long
             " group by a.PRODUCT_CODE,a.CS_IDX"
         ,nativeQuery = true)
     List<ProductStockInterface> findAllStockGroupByProduct();
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    ChannelStockList findPessimisticById(Long id);
 
     interface ProductStockInterface{
         int getStock();

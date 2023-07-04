@@ -30,7 +30,7 @@ public class ChannelStockList {
     @JoinColumn(name = "ACCOUNT_CODE",referencedColumnName = "ACCOUNT_CODE")
     private Account account;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRODUCT_CODE",referencedColumnName = "PRODUCT_CODE")
     private Item item;
 

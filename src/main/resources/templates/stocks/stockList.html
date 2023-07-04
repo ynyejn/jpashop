@@ -5,18 +5,19 @@
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <div>
-        <span>미분배 재고: <span th:text="${sapStock}"></span></span>
+        <span>미배분 재고: <span th:text="${sapStock}"></span></span>
         <a class="btn btn-sm btn-info float-right ml-1" href="javascript:void(0);" onclick="distributeStock();">재고분배</a>
-        <a class="btn btn-sm btn-primary float-right" href="javascript:void(0);" onclick="redistributeStock();">재고 재분배</a>
+<!--        <a class="btn btn-sm btn-primary float-right" href="javascript:void(0);" onclick="redistributeStock();">재고 재분배</a>-->
         <table class="table table-striped">
             <thead>
             <tr>
                 <th>#</th>
                 <th>매장명</th>
                 <th>상품명</th>
-                <th>상태</th>
-                <th>재고수량</th>
+<!--                <th>상태</th>-->
+                <th>배분수량</th>
                 <th>사용수량</th>
+                <th>가용재고</th>
 <!--                <th></th>-->
             </tr>
             </thead>
@@ -25,9 +26,10 @@
                 <td th:text="${item.id}"></td>
                 <td th:text="${item.accountName}"></td>
                 <td th:text="${item.productName}"></td>
-                <td th:text="${item.status}"></td>
+<!--                <td th:text="${item.status}"></td>-->
                 <td th:text="${item.stock}"></td>
                 <td th:text="${item.usedStock}"></td>
+                <td th:text="${item.stock}-${item.usedStock}"></td>
 <!--                <td>-->
 <!--                    <a href="#" th:href="@{/items/{id}/edit (id=${item.id})}"-->
 <!--                       class="btn btn-primary" role="button">수정</a>-->

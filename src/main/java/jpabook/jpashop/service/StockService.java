@@ -10,10 +10,7 @@ import jpabook.jpashop.domain.stock.SapStock;
 import jpabook.jpashop.dto.ChannelStockListDto;
 import jpabook.jpashop.dto.ProductStockDto;
 import jpabook.jpashop.dto.ResultResDataDto;
-import jpabook.jpashop.repository.DistributionRateRepository;
-import jpabook.jpashop.repository.SapStockRepository;
-import jpabook.jpashop.repository.StockListRepository;
-import jpabook.jpashop.repository.StockRepository;
+import jpabook.jpashop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -32,6 +29,7 @@ public class StockService {
     private final SapStockRepository sapStockRepository;
     private final DistributionRateRepository distributionRateRepository;
     private final ItemService itemService;
+    private final AccountService accountService;
     private final RedisTemplate<String,String> redisTemplate;
 
 
@@ -139,21 +137,22 @@ public class StockService {
     public ResultResDataDto fixStock(Order order) {
         try {
             int count = order.getOrderItems().get(0).getCount();
-            Optional<ChannelStockList> channelStockList = stockListRepository.checkStock(order.getAccount().getAccountCode(), order.getOrderItems().get(0).getItem().getProductCode(), count);
-            if (!channelStockList.isEmpty()) {
-                ChannelStockList channelStock = channelStockList.get();
-                Long avail = availableStock(channelStock.getId());
+            Optional<ChannelStockList> checkStock = stockListRepository.checkStock(order.getAccount().getAccountCode(), order.getOrderItems().get(0).getItem().getProductCode(), count);
+            if (!checkStock.isEmpty()) {
+                //--------------조회시 다른 트랙잭션에서 조회 불가하도록 lock 시작--------------
+                ChannelStockList channelStockList = stockListRepository.findPessimisticById(checkStock.get().getId());
+                Long avail = availableStock(channelStockList.getId());
                 System.out.println(avail);
                 if(avail-count>0){
                     for (int i = 0 ; i< count ; i++){
                         //redis 추가
-                        addOnRedis(String.valueOf(channelStock.getId()), String.valueOf(order.getId())+i);
+                        addOnRedis(String.valueOf(channelStockList.getId()), String.valueOf(order.getId())+(i+1));
                     }
                 }else{
-                    return ResultResDataDto.fromResMsg(false, "재고가 없어ㅆ");
+                    return ResultResDataDto.fromResMsg(false, "재고가 없어요");
                 }
             } else {
-                return ResultResDataDto.fromResMsg(false, "재고가 없어ㅆ");
+                return ResultResDataDto.fromResMsg(false, "재고가 없어요");
             }
             return ResultResDataDto.fromResMsg(true, "성공");
 
