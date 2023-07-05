@@ -40,7 +40,7 @@ public class StockService {
                 .accountName(cs.getAccount().getName())
                 .productName(cs.getItem().getName())
                 .stock(cs.getQty())
-                .usedStock(totalUsedCount(String.valueOf(cs.getId())))
+                .usedStock(totalUsedCount("stock:"+cs.getAccount().getAccountCode()+cs.getItem().getProductCode()))
                 .status(cs.getChannelStock().getStatus())
                 .build()).collect(Collectors.toList());
     }
@@ -55,7 +55,7 @@ public class StockService {
         try {
             List<SapStock> sapStocks = sapStockRepository.findAllByDistributionFlag(0);
             List<DistributionRate> distributionRateList = distributionRateRepository.findAll();
-            for (SapStock sapStock : sapStocks) {
+            for (SapStock sapStock : sapStocks) {//제품별 총재고
                 Long allStock = sapStock.getStock();
                 Item product = sapStock.getItem();
 
@@ -68,14 +68,25 @@ public class StockService {
 
                 //channelStockList
                 for (DistributionRate distributionRate : distributionRateList) {
+
+                    ChannelStockList channelStockList = null;
                     Account account = distributionRate.getAccount();
                     Long stock = allStock * distributionRate.getRate() / 100;
-                    ChannelStockList channelStockList = new ChannelStockList();
-                    channelStockList.setChannelStock(channelStock);
-                    channelStockList.setSapStock(sapStock);
-                    channelStockList.setQty(stock);
-                    channelStockList.setAccount(account);
-                    channelStockList.setItem(product);
+
+                    Optional<ChannelStockList> channelStockListOptional = stockListRepository.findByAccountAndItem(account,product);
+                    if(channelStockListOptional.isEmpty()){ //기존값 없을경우
+                        channelStockList = new ChannelStockList();
+                        channelStockList.setChannelStock(channelStock);
+                        channelStockList.setSapStock(sapStock);
+                        channelStockList.setQty(stock);
+                        channelStockList.setAccount(account);
+                        channelStockList.setItem(product);
+                    }else{
+                        channelStockList = channelStockListOptional.get();
+                        channelStockList.setChannelStock(channelStock);
+                        channelStockList.setSapStock(sapStock);
+                        channelStockList.setQty(stock);
+                    }
                     stockListRepository.save(channelStockList);
                 }
                 sapStock.setDistributionFlag(1);
@@ -137,16 +148,20 @@ public class StockService {
     public ResultResDataDto fixStock(Order order) {
         try {
             int count = order.getOrderItems().get(0).getCount();
-            Optional<ChannelStockList> checkStock = stockListRepository.checkStock(order.getAccount().getAccountCode(), order.getOrderItems().get(0).getItem().getProductCode(), count);
+            String accountCode = order.getAccount().getAccountCode();
+            String productCode = order.getOrderItems().get(0).getItem().getProductCode();
+            //findBy해서 account 랑 item으로 하는것으로 수정하자
+            Optional<ChannelStockList> checkStock = stockListRepository.checkStock(accountCode, productCode, count);
             if (!checkStock.isEmpty()) {
                 //--------------조회시 다른 트랙잭션에서 조회 불가하도록 lock 시작--------------
                 ChannelStockList channelStockList = stockListRepository.findPessimisticById(checkStock.get().getId());
+                String redisKey = "stock:"+accountCode+productCode;
                 Long avail = availableStock(channelStockList.getId());
                 System.out.println(avail);
                 if(avail-count>0){
                     for (int i = 0 ; i< count ; i++){
                         //redis 추가
-                        addOnRedis(String.valueOf(channelStockList.getId()), String.valueOf(order.getId())+(i+1));
+                        addOnRedis(redisKey, String.valueOf(order.getId())+(i+1));
                     }
                 }else{
                     return ResultResDataDto.fromResMsg(false, "재고가 없어요");
@@ -164,7 +179,8 @@ public class StockService {
     public Long availableStock(Long key){
         ChannelStockList channelStockList = stockListRepository.findById(key).get();
         Long allStock = channelStockList.getQty();
-        Long usedStock = totalUsedCount(String.valueOf(key));
+        String redisKey = "stock:"+channelStockList.getAccount().getAccountCode()+channelStockList.getItem().getProductCode();
+        Long usedStock = totalUsedCount(redisKey);
         return allStock-usedStock;
     }
 

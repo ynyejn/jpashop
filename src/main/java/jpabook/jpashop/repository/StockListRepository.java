@@ -1,6 +1,8 @@
 package jpabook.jpashop.repository;
 
 import jakarta.persistence.LockModeType;
+import jpabook.jpashop.domain.Account;
+import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.stock.ChannelStock;
 import jpabook.jpashop.domain.stock.ChannelStockList;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -36,6 +38,8 @@ public interface StockListRepository extends JpaRepository<ChannelStockList,Long
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     ChannelStockList findPessimisticById(Long id);
+
+    Optional<ChannelStockList> findByAccountAndItem(Account account, Item item);
 
     interface ProductStockInterface{
         int getStock();

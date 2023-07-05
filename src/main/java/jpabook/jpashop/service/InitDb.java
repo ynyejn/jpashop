@@ -50,10 +50,10 @@ public class InitDb {
             OrderItem orderItem2 = OrderItem.createOrderItem(book2, 20000, 2);
             Order order = Order.createOrder(account,member, createDelivery(member), orderItem1, orderItem2);
             em.persist(order);
-            SapStock sapStock = createSapStock(book1,100L);//lang-01
-            SapStock sapStock2 = createSapStock(book2,100L);//mantu-01
-            em.persist(sapStock);
-            em.persist(sapStock2);
+//            SapStock sapStock = createSapStock(book1,100L);//lang-01
+//            SapStock sapStock2 = createSapStock(book2,100L);//mantu-01
+//            em.persist(sapStock);
+//            em.persist(sapStock2);
         }
 
         public void dbInit2() {

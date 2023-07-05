@@ -5,9 +5,33 @@
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <div>
-        <span>미배분 재고: <span th:text="${sapStock}"></span></span>
-        <a class="btn btn-sm btn-info float-right ml-1" href="javascript:void(0);" onclick="distributeStock();">재고분배</a>
-<!--        <a class="btn btn-sm btn-primary float-right" href="javascript:void(0);" onclick="redistributeStock();">재고 재분배</a>-->
+        <div class="border-bottom mb-3" style="height: 150px;">
+            <div class="mb-1"> <span style="font-weight: bolder;">SAP->OMS <span ></span></span>
+                <a class="btn btn-sm btn-info float-right ml-1" href="javascript:void(0);" onclick="receiveStock();">SAP->OMS 현재고 전송</a>
+            </div>
+
+            <div class="form-group float-left" style="display: inline-block; width: 50%;">
+                <label for="item">상품명</label>
+                <select name="itemId" id="item" class="form-control">
+                    <option value="">상품선택</option>
+                    <option th:each="item : ${items}"
+                            th:value="${item.id}"
+                            th:text="${item.name}" />
+                </select>
+            </div>
+            <div class="form-group float-left" style="display: inline-block; width: 50%;">
+                <label for="count">재고 수량</label>
+                <input type="number" name="count" class="form-control" id="count"
+                       placeholder="재고 수량을 입력해주세요.">
+            </div>
+        </div>
+        <div>
+            <span style="font-weight: bolder;">채널별 배분 <span ></span></span>
+            <span>  E-COM 창고 미분배 수량: <span th:text="${sapStock}"></span></span>
+            <a class="btn btn-sm btn-info float-right ml-1" href="javascript:void(0);" onclick="distributeStock();">재고분배</a>
+            <!--        <a class="btn btn-sm btn-primary float-right" href="javascript:void(0);" onclick="redistributeStock();">재고 재분배</a>-->
+        </div>
+
         <table class="table table-striped">
             <thead>
             <tr>
@@ -42,6 +66,24 @@
 </div> <!-- /container -->
 </body>
 <script>
+    function receiveStock(){
+        let item = $("#item").val();
+        let count = $("#count").val();
+        $.ajax({
+            type: "POST",
+            url: "/sapStock/distribute",
+            data :{item:item,count:count}
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert("에러발생")
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
     function distributeStock(){
         $.ajax({
             type: "POST",
