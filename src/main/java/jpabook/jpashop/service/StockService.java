@@ -12,7 +12,9 @@ import jpabook.jpashop.dto.ProductStockDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,8 @@ public class StockService {
                 .accountName(cs.getAccount().getName())
                 .productName(cs.getItem().getName())
                 .stock(cs.getQty())
-                .usedStock(totalUsedCount("stock:"+cs.getAccount().getAccountCode()+cs.getItem().getProductCode()))
+                .usedStock(usedCount("stock:"+cs.getAccount().getAccountCode()+cs.getItem().getProductCode()))
+                .finishedStock(usedCount("finish:"+cs.getAccount().getAccountCode()+cs.getItem().getProductCode()))
                 .status(cs.getChannelStock().getStatus())
                 .build()).collect(Collectors.toList());
     }
@@ -59,6 +62,17 @@ public class StockService {
                 Long allStock = sapStock.getStock();
                 Item product = sapStock.getItem();
 
+
+                //홀딩재고 계산 (오더테이블에 미할당+상품명조건으로 검색)
+                //사용중재고 total 계산
+                ScanOptions scanOptions = ScanOptions.scanOptions().match("stock*"+product.getProductCode()).count(500).build();
+                Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
+                Long allUsedCount=0L;
+                while (keys.hasNext()){
+                    String key = new String(keys.next());
+                    allUsedCount+=usedCount(key);
+                }
+
                 //channelStock
                 ChannelStock channelStock = new ChannelStock();
                 channelStock.setTotalQty(allStock);
@@ -71,7 +85,8 @@ public class StockService {
 
                     ChannelStockList channelStockList = null;
                     Account account = distributionRate.getAccount();
-                    Long stock = allStock * distributionRate.getRate() / 100;
+                    double rate = distributionRate.getRate() / (double)100;
+                    Long stock = Math.round((allStock-allUsedCount) * rate) + usedCount("stock:"+account.getAccountCode()+product.getProductCode());
 
                     Optional<ChannelStockList> channelStockListOptional = stockListRepository.findByAccountAndItem(account,product);
                     if(channelStockListOptional.isEmpty()){ //기존값 없을경우
@@ -91,6 +106,14 @@ public class StockService {
                 }
                 sapStock.setDistributionFlag(1);
             }
+            //완료재고삭제
+            //사용중재고 total 계산
+            ScanOptions scanOptions = ScanOptions.scanOptions().match("finish*").count(500).build();
+            Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
+            while (keys.hasNext()){
+                String key = new String(keys.next());
+                delOnRedis(key);
+            }
 
             return ResultResDataDto.fromResMsg(true, "성공");
 
@@ -101,6 +124,9 @@ public class StockService {
 
 
     }
+
+
+
     @Transactional
     public ResultResDataDto redistributeStock() {
         try {
@@ -180,18 +206,39 @@ public class StockService {
         ChannelStockList channelStockList = stockListRepository.findById(key).get();
         Long allStock = channelStockList.getQty();
         String redisKey = "stock:"+channelStockList.getAccount().getAccountCode()+channelStockList.getItem().getProductCode();
-        Long usedStock = totalUsedCount(redisKey);
+        Long usedStock = usedCount(redisKey);
         return allStock-usedStock;
     }
 
-    public Long totalUsedCount(String key){
+    public Long usedCount(String key){
         return redisTemplate.opsForSet().size(key);
     }
     public void addOnRedis(String key,String value){
         Long addSiz = redisTemplate.opsForSet().add(key, value);
     }
+    private void delOnRedis(String key) {
+        Boolean delete = redisTemplate.delete(key);
+    }
+    public void delOnRedis(String key,String value){
+        Long remove = redisTemplate.opsForSet().remove(key,value);
+    }
     private String generateKey(Long key){
         return key.toString();
     }
 
+    public ResultResDataDto finishStock(Order order) {  //레디스 사용중인거에서 빼고 완료에 넣어야됨
+        try {
+            int count = order.getOrderItems().get(0).getCount();
+            String accountCode = order.getAccount().getAccountCode();
+            String productCode = order.getOrderItems().get(0).getItem().getProductCode();
+            String redisFinishKey = "finish:"+accountCode+productCode;
+            String redisKey = "stock:"+accountCode+productCode;
+            delOnRedis(redisKey,String.valueOf(order.getId())+1);
+            addOnRedis(redisFinishKey, String.valueOf(order.getId())+1);
+
+            return ResultResDataDto.fromResMsg(true, "성공");
+        }catch (Exception e){
+            return ResultResDataDto.fromResMsg(false, "실패");
+        }
+    }
 }

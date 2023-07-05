@@ -11,5 +11,6 @@ public class ChannelStockListDto {
     private String productName;
     private Long stock;
     private Long usedStock;
+    private Long finishedStock;
     private String status;
 }

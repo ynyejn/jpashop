@@ -84,4 +84,11 @@ public class OrderService {
         order.setStatus(OrderStatus.ORDER_FIX);
         return stockService.fixStock(order);
     }
+
+    @Transactional
+    public ResultResDataDto finishOrder(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        order.setStatus(OrderStatus.FINISH);
+        return stockService.finishStock(order);
+    }
 }

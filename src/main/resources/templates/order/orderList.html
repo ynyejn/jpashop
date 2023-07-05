@@ -54,6 +54,9 @@
                     <a th:if="${order.status.name() == 'ORDER'}" href="#"
                        th:href="'javascript:fixOrder('+${order.id}+')'"
                        class="btn btn-dark">주문할당</a>
+                    <a th:if="${order.status.name() == 'ORDER_FIX'}" href="#"
+                       th:href="'javascript:finishOrder('+${order.id}+')'"
+                       class="btn btn-dark">배송완료</a>
                 </td>
             </tr>
             </tbody>
@@ -74,6 +77,21 @@
         $.ajax({
             type: "POST",
             url: "/order/"+id+"/fix"
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert(data.message)
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
+    function finishOrder(id){
+        $.ajax({
+            type: "POST",
+            url: "/order/"+id+"/finish"
         }).done(function (data) {
             if (data.result) {
                 alert("성공하였습니다.");
