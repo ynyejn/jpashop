@@ -42,6 +42,7 @@
                 <th>창고수량</th>
                 <th>사용중수량</th>
                 <th>가용재고</th>
+                <th>배송완료</th>
 <!--                <th></th>-->
             </tr>
             </thead>
@@ -54,6 +55,7 @@
                 <td th:text="${item.stock}-${item.finishedStock}"></td>
                 <td th:text="${item.usedStock}"></td>
                 <td th:text="${item.stock}-${item.finishedStock}-${item.usedStock}"></td>
+                <td th:text="${item.finishedStock}"></td>
 <!--                <td>-->
 <!--                    <a href="#" th:href="@{/items/{id}/edit (id=${item.id})}"-->
 <!--                       class="btn btn-primary" role="button">수정</a>-->
