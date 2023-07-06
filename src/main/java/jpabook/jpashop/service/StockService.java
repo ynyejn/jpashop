@@ -184,7 +184,7 @@ public class StockService {
                 String redisKey = "stock:"+accountCode+productCode;
                 Long avail = availableStock(channelStockList.getId());
                 System.out.println(avail);
-                if(avail-count>0){
+                if(avail-count>=0){
                     for (int i = 0 ; i< count ; i++){
                         //redis 추가
                         addOnRedis(redisKey, String.valueOf(order.getId())+(i+1));
