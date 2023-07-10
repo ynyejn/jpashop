@@ -32,13 +32,21 @@ public class InitDb {
         public void dbInit1() {
             Account account = createAccount("E1001","GM_ONLINE_자사몰_국내");
             Account account2 = createAccount("E1002","GM_ONLINE_KAKAO");
+            Account account3 = createAccount("E1003","GM_ONLINE_LOTTE");
+            Account account4 = createAccount("E1004","GM_ONLINE_SSG");
             em.persist(account);
             em.persist(account2);
+            em.persist(account3);
+            em.persist(account4);
 
-            DistributionRate distributionRate = createDistributionRate(account,60);
-            DistributionRate distributionRate2 = createDistributionRate(account2,40);
+            DistributionRate distributionRate = createDistributionRate(account,60,1);
+            DistributionRate distributionRate2 = createDistributionRate(account2,40,2);
+//            DistributionRate distributionRate3 = createDistributionRate(account3,30,3);
+//            DistributionRate distributionRate4 = createDistributionRate(account4,10,4);
             em.persist(distributionRate);
             em.persist(distributionRate2);
+//            em.persist(distributionRate3);
+//            em.persist(distributionRate4);
 
             Member member = createMember("userA", "서울", "1", "1111");
             em.persist(member);
@@ -103,10 +111,11 @@ public class InitDb {
             account.setName(name);
             return account;
         }
-        private DistributionRate createDistributionRate(Account account, int rate){
+        private DistributionRate createDistributionRate(Account account, int rate,int sort){
             DistributionRate distributionRate = new DistributionRate();
             distributionRate.setAccount(account);
             distributionRate.setRate(rate);
+            distributionRate.setSort(sort);
             return distributionRate;
         }
 

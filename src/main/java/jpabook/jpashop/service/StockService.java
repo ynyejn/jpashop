@@ -2,6 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.Account;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.stock.ChannelStock;
 import jpabook.jpashop.domain.stock.ChannelStockList;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class StockService {
+    private final OrderJpaRepository orderRepository;
     private final StockRepository stockRepository;
     private final StockListRepository stockListRepository;
     private final SapStockRepository sapStockRepository;
@@ -57,13 +59,33 @@ public class StockService {
     public ResultResDataDto distributeStock() {
         try {
             List<SapStock> sapStocks = sapStockRepository.findAllByDistributionFlag(0);
-            List<DistributionRate> distributionRateList = distributionRateRepository.findAll();
+            List<DistributionRate> distributionRateList = distributionRateRepository.findAllByOrderBySortAsc();
             for (SapStock sapStock : sapStocks) {//제품별 총재고
                 Long allStock = sapStock.getStock();
+                Long availableStock = allStock;
+                Long allStockRemainder = allStock % distributionRateList.size();
+                Long remainderStock = allStockRemainder;
                 Item product = sapStock.getItem();
 
+                //홀딩재고 계산 (오더테이블에 미할당+상품명조건으로 검색) => 이때 사용중으로 들어감
+                List<Order> unfixOrder = orderRepository.findAllByItemAndStatus(product, OrderStatus.ORDER);
+                System.out.println(unfixOrder.size());
+                for (Order order : unfixOrder) {
+                    int count = order.getOrderItems().get(0).getCount();
+                    if(availableStock-count>=0){
+                        for (int i = 0 ; i< count ; i++){
+                            order.setStatus(OrderStatus.ORDER_FIX);
+                            String accountCode = order.getAccount().getAccountCode();
+                            String productCode = order.getOrderItems().get(0).getItem().getProductCode();
+                            String redisKey = "stock:"+accountCode+productCode;
 
-                //홀딩재고 계산 (오더테이블에 미할당+상품명조건으로 검색)
+                            //redis 추가
+                            addOnRedis(redisKey, String.valueOf(order.getId())+(i+1));
+                        }
+                    }
+                }
+
+
                 //사용중재고 total 계산
                 ScanOptions scanOptions = ScanOptions.scanOptions().match("stock*"+product.getProductCode()).count(500).build();
                 Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
@@ -86,8 +108,11 @@ public class StockService {
                     ChannelStockList channelStockList = null;
                     Account account = distributionRate.getAccount();
                     double rate = distributionRate.getRate() / (double)100;
-                    Long stock = Math.round((allStock-allUsedCount) * rate) + usedCount("stock:"+account.getAccountCode()+product.getProductCode());
-
+                    Long stock = Math.round((allStock-allStockRemainder-allUsedCount) * rate) + usedCount("stock:"+account.getAccountCode()+product.getProductCode());
+                    if(remainderStock>0){
+                        stock++;
+                        remainderStock--;
+                    }
                     Optional<ChannelStockList> channelStockListOptional = stockListRepository.findByAccountAndItem(account,product);
                     if(channelStockListOptional.isEmpty()){ //기존값 없을경우
                         channelStockList = new ChannelStockList();
@@ -128,7 +153,7 @@ public class StockService {
 
 
     @Transactional
-    public ResultResDataDto redistributeStock() {
+    public ResultResDataDto redistributeStock() {   //사용안함
         try {
             List<SapStock> sapStocks = sapStockRepository.findAllByDistributionFlag(0);
             List<DistributionRate> distributionRateList = distributionRateRepository.findAll();

@@ -18,4 +18,6 @@ public class DistributionRate {
     @JoinColumn(name = "ACCOUNT_CODE",referencedColumnName = "ACCOUNT_CODE")
     private Account account;
     private int rate;
+
+    private int sort;
 }
