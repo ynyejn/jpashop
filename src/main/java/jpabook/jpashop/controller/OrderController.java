@@ -1,9 +1,12 @@
 package jpabook.jpashop.controller;
 
+import jakarta.validation.Valid;
 import jpabook.jpashop.domain.Account;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.dto.OrderForm;
+import jpabook.jpashop.dto.OrderItemDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.repository.OrderSearch;
 import jpabook.jpashop.service.AccountService;
@@ -40,14 +43,12 @@ public class OrderController {
     }
 
     @PostMapping ("/order")
-    public String create(@RequestParam("accountCode") String accountCode,
-                         @RequestParam("memberId") Long memberId,
-                         @RequestParam("itemId") Long itemId,
-                         @RequestParam("count") int count){
+    public String create(@Valid OrderForm orderForm){
 
-        orderService.order(accountCode,memberId, itemId, count);
+        orderService.order(orderForm.getAccountCode(),orderForm.getMemberId(), orderForm.getItem());
         return "redirect:/orders";
     }
+
 
     @GetMapping("/orders")
     public String orderList(@ModelAttribute("orderSearch")OrderSearch orderSearch,Model model){

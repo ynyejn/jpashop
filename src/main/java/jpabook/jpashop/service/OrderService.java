@@ -3,6 +3,7 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.domain.*;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.stock.ChannelStock;
+import jpabook.jpashop.dto.OrderItemDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.exception.NotEnoughStockException;
 import jpabook.jpashop.repository.*;
@@ -11,6 +12,7 @@ import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,17 +30,24 @@ public class OrderService {
      * 주문
      */
     @Transactional
-    public Long order(String accountCode, Long memberId, Long itemId, int count){
+    public Long order(String accountCode, Long memberId, List<OrderItemDto> itemDtoList){
 
         //엔티티조회
         Member member = memberRepository.findById(memberId).get();
-        Item item = itemRepository.findOne(itemId);
+        List<Item> itemList = new ArrayList<>();
         Account account = accountRepository.findByAccountCode(accountCode);
-
-        //재고확인
-        if(!stockService.checkStock(account.getAccountCode(),item.getProductCode(),count)){
-             throw new NotEnoughStockException("해당매장에 재고가 부족합니다.");
+        List<OrderItem> orderItemList = new ArrayList<>();
+        for (OrderItemDto itemDto : itemDtoList) {
+            Item item = itemRepository.findOne(itemDto.getItemId());
+            itemList.add(item);
+            //재고확인
+            if(!stockService.checkStock(account.getAccountCode(),item.getProductCode(),itemDto.getCount())){
+                throw new NotEnoughStockException("해당매장에 "+item.getName()+" 재고가 부족합니다.");
+            }
+            OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), itemDto.getCount());//예시는 오더아이템하나만 넘길수있도록만듬
+            orderItemList.add(orderItem);
         }
+
 
         //배송정보 설정
         Delivery delivery = new Delivery();
@@ -49,10 +58,10 @@ public class OrderService {
         //Delivery도 마찬가지,
         //근데 cascade는 막 쓰면 안됨 다른데서 다 쓰이는 애를 cascade하면 안되니까 잘 생각해서 해야 함
         //order와 delivery와 orderitem은 liftcycle이 완전히 같기 때문에 사용할 수 있다
-        OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), count);//예시는 오더아이템하나만 넘길수있도록만듬
+//        OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), count);//예시는 오더아이템하나만 넘길수있도록만듬
 
         //주문생성
-        Order order = Order.createOrder(account,member, delivery, orderItem);
+        Order order = Order.createOrder(account,member, orderItemList);
 
         //주문저장
         orderRepository.save(order);

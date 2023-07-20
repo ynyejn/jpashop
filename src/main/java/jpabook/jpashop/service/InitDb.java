@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component  //bean없이 가능 Autowired와 비슷
 @RequiredArgsConstructor
 public class InitDb {
@@ -56,7 +59,10 @@ public class InitDb {
             em.persist(book2);
             OrderItem orderItem1 = OrderItem.createOrderItem(book1, 10000, 1);
             OrderItem orderItem2 = OrderItem.createOrderItem(book2, 20000, 2);
-            Order order = Order.createOrder(account,member, createDelivery(member), orderItem1, orderItem2);
+            List<OrderItem> orderItemList =new ArrayList<>();
+            orderItemList.add(orderItem1); orderItemList.add(orderItem2);
+//            Order order = Order.createOrder(account,member, orderItem1, orderItem2);
+            Order order = Order.createOrder(account,member, orderItemList);
             em.persist(order);
 //            SapStock sapStock = createSapStock(book1,100L);//lang-01
 //            SapStock sapStock2 = createSapStock(book2,100L);//mantu-01
@@ -93,11 +99,11 @@ public class InitDb {
             return book;
         }
 
-        private Delivery createDelivery(Member member) {
-            Delivery delivery = new Delivery();
-            delivery.setAddress(member.getAddress());
-            return delivery;
-        }
+//        private Delivery createDelivery(Member member) {
+//            Delivery delivery = new Delivery();
+//            delivery.setAddress(member.getAddress());
+//            return delivery;
+//        }
         private SapStock createSapStock(Item item, Long stock){
             SapStock sapStock = new SapStock();
             sapStock.setItem(item);

@@ -2,7 +2,6 @@ package jpabook.jpashop.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.aspectj.weaver.ast.Or;
 import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
@@ -58,11 +57,12 @@ public class Order {
     }
 
     //======생성 메소드======//
-    public static Order createOrder(Account account, Member member, Delivery delivery, OrderItem... orderItems){
+//    public static Order createOrder(Account account, Member member, OrderItem... orderItems){
+    public static Order createOrder(Account account, Member member, List<OrderItem> orderItems){
         Order order = new Order();
         order.setAccount(account);
         order.setMember(member);
-        order.setDelivery(delivery);
+//        order.setDelivery(delivery);
         for (OrderItem orderItem:orderItems){
             order.addOrderItem(orderItem);
         }
