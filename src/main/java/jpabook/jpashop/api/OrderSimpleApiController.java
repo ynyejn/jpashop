@@ -35,7 +35,7 @@ public class OrderSimpleApiController {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
         for (Order order : all) {
             order.getMember().getName();    //Lazy가 강제초기화(getName에서), getMember에서는 proxy상태
-            order.getDelivery().getAddress();    //Lazy가 강제초기화(getAddress)
+//            order.getDelivery().getAddress();    //Lazy가 강제초기화(getAddress)
             //orderItems는 제외하고 원하는것만 지연로딩
         }
         return all;
@@ -77,7 +77,7 @@ public class OrderSimpleApiController {
             name = order.getMember().getName();
             orderDate= order.getOrderDate();
             orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress();
+//            address = order.getDelivery().getAddress();
         }
     }
 

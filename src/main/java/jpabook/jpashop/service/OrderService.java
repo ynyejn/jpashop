@@ -106,7 +106,7 @@ public class OrderService {
     @Transactional
     public ResultResDataDto fixOrder(Long orderId) {
         Order order = orderRepository.findOne(orderId);
-        order.setStatus(OrderStatus.ORDER_FIX);
+//        order.setStatus(OrderStatus.ORDER_FIX);
         return stockService.fixStock(order);
     }
 

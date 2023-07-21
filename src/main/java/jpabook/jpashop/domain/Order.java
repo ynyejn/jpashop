@@ -31,10 +31,6 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)//cascade 여기리스트에만 넣어도 orderItem insert됨 delete도같이됨
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToOne(fetch = LAZY , cascade = CascadeType.ALL)
-    @JoinColumn(name = "delivery_id")   //"연관관계 주인"
-    private Delivery delivery;
-
     private LocalDateTime orderDate;//주문시간
     @Enumerated(EnumType.STRING)//ORDINAL은 상태추가되면 유동적이지가 않음 절대쓰면안됨
     private OrderStatus status; //주문상태[ORDER, CANCEL]
@@ -51,10 +47,10 @@ public class Order {
         orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
-    public void setDelivery(Delivery delivery){
-        this.delivery = delivery;
-        delivery.setOrder(this);
-    }
+//    public void setDelivery(Delivery delivery){
+//        this.delivery = delivery;
+//        delivery.setOrder(this);
+//    }
 
     //======생성 메소드======//
 //    public static Order createOrder(Account account, Member member, OrderItem... orderItems){
@@ -76,9 +72,9 @@ public class Order {
      * 주문 취소
      */
     public void cancel(){
-        if(delivery.getStatus()==DeliveryStatus.COMP){//배송완료
-            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
-        }
+//        if(delivery.getStatus()==DeliveryStatus.COMP){//배송완료
+//            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
+//        }
         this.setStatus(OrderStatus.CANCEL);
         for (OrderItem orderItem:orderItems){
             orderItem.cancel();

@@ -19,7 +19,7 @@ import static jakarta.persistence.FetchType.*;
 public class OrderItem {
 
     @Id @GeneratedValue
-    @Column(name = "order_item_id")
+    @Column(name = "orderItem_id")
     private Long id;
 
     @ManyToOne(fetch = LAZY)
@@ -36,6 +36,10 @@ public class OrderItem {
     @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "orderItem",fetch = LAZY)
+    private DeliveryItem deliveryItem;
+
 
 
     //======생성 메소드======//
@@ -47,6 +51,10 @@ public class OrderItem {
         orderItem.setStatus(OrderItemStatus.ORDER);
 //        item.removeStock(count);    //아이템 재고제거
         return orderItem;
+    }
+
+    public void fixOrderItem(){
+        this.status = OrderItemStatus.ORDER_FIX;
     }
 
     //비즈니스로직
