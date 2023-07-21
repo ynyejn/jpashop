@@ -9,10 +9,10 @@ public class UpdateItemDto
 {
     private Long id;
     private String name;
-    private int price;
-    private int stockQuantity;
+    private Long price;
+    private Long stockQuantity;
 
-    public UpdateItemDto(Long id, String name, int price, int stockQuantity) {
+    public UpdateItemDto(Long id, String name, Long price, Long stockQuantity) {
         this.id = id;
         this.name = name;
         this.price = price;

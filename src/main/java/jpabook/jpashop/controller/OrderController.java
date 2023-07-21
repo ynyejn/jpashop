@@ -5,8 +5,8 @@ import jpabook.jpashop.domain.Account;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderForm;
-import jpabook.jpashop.dto.OrderItemDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.repository.OrderSearch;
 import jpabook.jpashop.service.AccountService;
@@ -14,7 +14,6 @@ import jpabook.jpashop.service.ItemService;
 import jpabook.jpashop.service.MemberService;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.Banner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +43,6 @@ public class OrderController {
 
     @PostMapping ("/order")
     public String create(@Valid OrderForm orderForm){
-
         orderService.order(orderForm.getAccountCode(),orderForm.getMemberId(), orderForm.getItem());
         return "redirect:/orders";
     }
@@ -54,7 +52,8 @@ public class OrderController {
     public String orderList(@ModelAttribute("orderSearch")OrderSearch orderSearch,Model model){
         //ModelAttribute 셋팅하면 model박스에 저절로 담김 저절로 뿌려지고 저절로 담김
         //model.addAttribute("orderSearch",orderSearch); 저절로해줌
-        List<Order> orders = orderService.searchOrder(orderSearch);
+        List<OrderDto> orders = orderService.searchOrder(orderSearch);
+
         model.addAttribute("orders",orders);
 
         return "order/orderList";

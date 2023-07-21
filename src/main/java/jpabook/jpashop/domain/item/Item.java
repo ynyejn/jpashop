@@ -24,7 +24,7 @@ public abstract class Item {
     @Column(name = "PRODUCT_CODE",nullable = false,unique = true)
     private String productCode;
     private String name;
-    private int price;
+    private Long price;
 
     @ManyToMany(mappedBy = "items")
     private List<Category> categories = new ArrayList<>();
@@ -48,7 +48,7 @@ public abstract class Item {
 //        this.stockQuantity = restStock;
 //    }
 
-    public void change(String name, int price, int stockQuantity) {
+    public void change(String name, Long price, Long stockQuantity) {
         this.name=name;
         this.price=price;
 //        this.stockQuantity=stockQuantity;

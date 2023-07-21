@@ -2,18 +2,18 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.*;
 import jpabook.jpashop.domain.item.Item;
-import jpabook.jpashop.domain.stock.ChannelStock;
-import jpabook.jpashop.dto.OrderItemDto;
+import jpabook.jpashop.dto.OrderDto;
+import jpabook.jpashop.dto.OrderItemFormDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.exception.NotEnoughStockException;
 import jpabook.jpashop.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,6 +21,8 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderJpaRepository orderJpaRepository;
     private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
     private final AccountRepository accountRepository;
@@ -30,22 +32,25 @@ public class OrderService {
      * 주문
      */
     @Transactional
-    public Long order(String accountCode, Long memberId, List<OrderItemDto> itemDtoList){
+    public Long order(String accountCode, Long memberId, List<OrderItemFormDto> itemDtoList){
 
         //엔티티조회
         Member member = memberRepository.findById(memberId).get();
         List<Item> itemList = new ArrayList<>();
         Account account = accountRepository.findByAccountCode(accountCode);
         List<OrderItem> orderItemList = new ArrayList<>();
-        for (OrderItemDto itemDto : itemDtoList) {
+        for (OrderItemFormDto itemDto : itemDtoList) {
             Item item = itemRepository.findOne(itemDto.getItemId());
             itemList.add(item);
             //재고확인
             if(!stockService.checkStock(account.getAccountCode(),item.getProductCode(),itemDto.getCount())){
                 throw new NotEnoughStockException("해당매장에 "+item.getName()+" 재고가 부족합니다.");
             }
-            OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), itemDto.getCount());//예시는 오더아이템하나만 넘길수있도록만듬
-            orderItemList.add(orderItem);
+            for (int i = 0; i<itemDto.getCount();i++){
+                OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), 1L);
+                orderItemList.add(orderItem);
+            }
+
         }
 
 
@@ -80,9 +85,20 @@ public class OrderService {
     }
 
     //검색
-    public List<Order> searchOrder(OrderSearch orderSearch){
+    public List<OrderDto> searchOrder(OrderSearch orderSearch){
 //        List<Order> orders = orderRepository.findAllByString(orderSearch);
-        List<Order> orders = orderRepository.findAll(orderSearch);
+//        List<Order> orders = orderRepository.findAll(orderSearch);
+        List<OrderDto> orders = orderJpaRepository.findAll().stream()
+                .map(o->OrderDto.builder()
+                        .id(o.getId())
+                        .memberName(o.getMember().getName())
+                        .accountName(o.getAccount().getName())
+                        .regdate(o.getOrderDate())
+                        .orderItems(orderItemRepository.findOrderItemDtos(o.getId()))
+                        .build())
+                .collect(Collectors.toList());
+        System.out.println(orders.size());
+        System.out.println("g");
         return orders;
     }
 

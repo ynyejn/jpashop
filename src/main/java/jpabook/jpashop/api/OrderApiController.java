@@ -110,8 +110,8 @@ public class OrderApiController {
     @Getter
     static class OrderItemDto{
         private String itemName;
-        private int orderPrice;
-        private int count;
+        private Long orderPrice;
+        private Long count;
         public OrderItemDto(OrderItem orderItem) {
             itemName = orderItem.getItem().getName();
             orderPrice = orderItem.getOrderPrice();

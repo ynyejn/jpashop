@@ -89,9 +89,9 @@ public class Order {
     /**
      * 전체 주문가격 조회
      */
-    public int getTotalPrice(){
-        int totalPrice= orderItems.stream()
-                .mapToInt(OrderItem::getTotalPrice).sum();
+    public Long getTotalPrice(){
+        Long totalPrice= orderItems.stream()
+                .mapToLong(OrderItem::getTotalPrice).sum();
         return totalPrice;
     }
 

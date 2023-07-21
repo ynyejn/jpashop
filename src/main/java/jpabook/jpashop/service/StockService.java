@@ -71,7 +71,7 @@ public class StockService {
                 List<Order> unfixOrder = orderRepository.findAllByItemAndStatus(product, OrderStatus.ORDER);
                 System.out.println(unfixOrder.size());
                 for (Order order : unfixOrder) {
-                    int count = order.getOrderItems().get(0).getCount();
+                    Long count = order.getOrderItems().get(0).getCount();
                     if(availableStock-count>=0){
                         for (int i = 0 ; i< count ; i++){
                             order.setStatus(OrderStatus.ORDER_FIX);
@@ -184,7 +184,7 @@ public class StockService {
         }
     }
 
-    public boolean checkStock(String accountCode, String productCode, int count) {
+    public boolean checkStock(String accountCode, String productCode, Long count) {
         Optional<ChannelStockList> channelStock = stockListRepository.checkStock(accountCode, productCode, count);
         if (channelStock.isEmpty()) {
             return false;
@@ -198,7 +198,7 @@ public class StockService {
     @Transactional
     public ResultResDataDto fixStock(Order order) {
         try {
-            int count = order.getOrderItems().get(0).getCount();
+            Long count = order.getOrderItems().get(0).getCount();
             String accountCode = order.getAccount().getAccountCode();
             String productCode = order.getOrderItems().get(0).getItem().getProductCode();
             //findBy해서 account 랑 item으로 하는것으로 수정하자
@@ -253,7 +253,7 @@ public class StockService {
 
     public ResultResDataDto finishStock(Order order) {  //레디스 사용중인거에서 빼고 완료에 넣어야됨
         try {
-            int count = order.getOrderItems().get(0).getCount();
+            Long count = order.getOrderItems().get(0).getCount();
             String accountCode = order.getAccount().getAccountCode();
             String productCode = order.getOrderItems().get(0).getItem().getProductCode();
             String redisFinishKey = "finish:"+accountCode+productCode;

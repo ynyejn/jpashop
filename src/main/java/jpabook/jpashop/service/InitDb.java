@@ -53,14 +53,15 @@ public class InitDb {
 
             Member member = createMember("userA", "서울", "1", "1111");
             em.persist(member);
-            Book book1 = createBook("lang-01", 10000, 100L,"11000405");
+            Book book1 = createBook("lang-01", 10000L, 100L,"11000405");
             em.persist(book1);
-            Book book2 = createBook("mantu-01", 20000, 100L,"11000123");
+            Book book2 = createBook("mantu-01", 20000L, 100L,"11000123");
             em.persist(book2);
-            OrderItem orderItem1 = OrderItem.createOrderItem(book1, 10000, 1);
-            OrderItem orderItem2 = OrderItem.createOrderItem(book2, 20000, 2);
+            OrderItem orderItem1 = OrderItem.createOrderItem(book1, 10000L, 1L);
+            OrderItem orderItem2 = OrderItem.createOrderItem(book2, 20000L, 1L);
+            OrderItem orderItem3 = OrderItem.createOrderItem(book2, 20000L, 1L);
             List<OrderItem> orderItemList =new ArrayList<>();
-            orderItemList.add(orderItem1); orderItemList.add(orderItem2);
+            orderItemList.add(orderItem1); orderItemList.add(orderItem2); orderItemList.add(orderItem3);
 //            Order order = Order.createOrder(account,member, orderItem1, orderItem2);
             Order order = Order.createOrder(account,member, orderItemList);
             em.persist(order);
@@ -90,7 +91,7 @@ public class InitDb {
             return member;
         }
 
-        private Book createBook(String name, int price, Long stockQuantity,String sapCode) {
+        private Book createBook(String name, Long price, Long stockQuantity,String sapCode) {
             Book book = new Book();
             book.setName(name);
             book.setPrice(price);

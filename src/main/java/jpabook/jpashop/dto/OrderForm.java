@@ -12,5 +12,5 @@ import java.util.List;
 public class OrderForm {
     private String accountCode;
     private Long memberId;
-    private List<OrderItemDto> item;
+    private List<OrderItemFormDto> item;
 }

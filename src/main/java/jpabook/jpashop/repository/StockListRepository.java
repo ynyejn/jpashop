@@ -26,7 +26,7 @@ public interface StockListRepository extends JpaRepository<ChannelStockList,Long
             " where a.accountCode=:acode " +
             " and i.productCode=:pcode " +
             " and csl.qty>=:count order by csl.id desc limit 1 ")
-    Optional<ChannelStockList> checkStock(@Param("acode") String accountCode, @Param("pcode") String productCode, @Param("count") int count);
+    Optional<ChannelStockList> checkStock(@Param("acode") String accountCode, @Param("pcode") String productCode, @Param("count") Long count);
 
     @Query(value = "select sum(QTY) as stock ,a.PRODUCT_CODE as productCode from CHANNEL_STOCK_LIST as a " +
             "left join CHANNEL_STOCK as b on(a.CS_IDX=b.CS_IDX) " +

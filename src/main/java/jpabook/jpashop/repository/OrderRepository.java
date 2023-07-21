@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.*;
 import jpabook.jpashop.api.OrderSimpleApiController;
 import jpabook.jpashop.domain.*;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.item.QItem;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -101,6 +102,8 @@ public class OrderRepository {  //repository 는 가급적 순수한 entity를 �
         QOrder order = QOrder.order;
         QMember member = QMember.member;
         QAccount account = QAccount.account;
+        QOrderItem orderItem = QOrderItem.orderItem;
+        QItem item = QItem.item;
 
         //jpql로 바뀌어서 실행됨 자동으로
         return query
@@ -108,7 +111,10 @@ public class OrderRepository {  //repository 는 가급적 순수한 entity를 �
                 .from(order)
                 .join(order.member , member)
                 .join(order.account, account)
+                .join(order.orderItems, orderItem)
+                .join(orderItem.item,item)
                 .where(statusEq(orderSearch.getOrderStatus()), nameLike(orderSearch.getMemberName()))
+                .groupBy(item)
                 .limit(1000)
                 .fetch();
     }
@@ -127,7 +133,13 @@ public class OrderRepository {  //repository 는 가급적 순수한 entity를 �
             return QOrder.order.status.eq(status);
         }
     }
-
+    public List<Order> findAllCustom() {
+        return em.createQuery("select o from Order o"+
+                        " join fetch o.member m" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i",Order.class)
+                .getResultList();
+    }
     public List<Order> findAllWithMemberDelivery() {
         return em.createQuery("select o from Order o"+
                 " join fetch o.member m" +

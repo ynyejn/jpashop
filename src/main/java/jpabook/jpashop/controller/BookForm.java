@@ -9,8 +9,8 @@ public class BookForm {
     //상품은 상품수량때문에 id값이 있어야함
     private Long id;
     private String name;
-    private int price;
-    private int stockQuantity;
+    private Long price;
+    private Long stockQuantity;
     private String author;
     private String isbn;
 }

@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.aspectj.weaver.ast.Or;
 
+import java.util.List;
+
 import static jakarta.persistence.FetchType.*;
 
 @Entity
@@ -29,18 +31,20 @@ public class OrderItem {
     @JoinColumn(name = "order_id") //다에 외래키가 들어감
     private Order order;
 
-    private int orderPrice;//주문가격
-    private int count;//주문수량
+    private Long orderPrice;//주문가격
+    private Long count;//주문수량
+    @Enumerated(EnumType.STRING)
+    private OrderItemStatus status;
 
 
 
     //======생성 메소드======//
-    public static OrderItem createOrderItem(Item item, int orderPrice, int count){
+    public static OrderItem createOrderItem(Item item, Long orderPrice, Long count){
         OrderItem orderItem = new OrderItem();
         orderItem.setItem(item);
         orderItem.setOrderPrice(orderPrice);
         orderItem.setCount(count);
-
+        orderItem.setStatus(OrderItemStatus.ORDER);
 //        item.removeStock(count);    //아이템 재고제거
         return orderItem;
     }
@@ -56,7 +60,7 @@ public class OrderItem {
     /**
      * 주문상품 전체 가격 조회
      */
-    public int getTotalPrice() {
+    public Long getTotalPrice() {
         return getOrderPrice()*getCount();
     }
 }
