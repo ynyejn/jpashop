@@ -1,5 +1,6 @@
 package jpabook.jpashop.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -34,6 +35,10 @@ public class Order {
     private LocalDateTime orderDate;//주문시간
     @Enumerated(EnumType.STRING)//ORDINAL은 상태추가되면 유동적이지가 않음 절대쓰면안됨
     private OrderStatus status; //주문상태[ORDER, CANCEL]
+
+    @OneToMany(mappedBy = "order",fetch = LAZY)
+    @JsonIgnore
+    private List<Delivery> deliveries = new ArrayList<>();
 
 
 

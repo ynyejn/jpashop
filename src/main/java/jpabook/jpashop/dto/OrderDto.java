@@ -1,5 +1,7 @@
 package jpabook.jpashop.dto;
 
+import jpabook.jpashop.domain.DeliveryStatus;
+import jpabook.jpashop.domain.OrderStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,5 +16,7 @@ public class OrderDto {
     private String memberName;
     private LocalDateTime regdate;
     private List<OrderItemDto> orderItems;
+    private OrderStatus orderStatus;
+    private boolean deliveryFlag;
 
 }

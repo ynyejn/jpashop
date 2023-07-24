@@ -95,6 +95,8 @@ public class OrderService {
                         .accountName(o.getAccount().getName())
                         .regdate(o.getOrderDate())
                         .orderItems(orderItemRepository.findOrderItemDtos(o.getId()))
+                        .orderStatus(o.getStatus())
+                        .deliveryFlag(o.getDeliveries().isEmpty()?false:true)
                         .build())
                 .collect(Collectors.toList());
         System.out.println(orders.size());
@@ -116,4 +118,10 @@ public class OrderService {
         order.setStatus(OrderStatus.FINISH);
         return stockService.finishStock(order);
     }
+    @Transactional
+    public ResultResDataDto fixDelivery(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        return stockService.fixDelivery(order);
+    }
+
 }

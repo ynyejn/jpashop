@@ -33,6 +33,8 @@
                 <th>상품 가격</th>
                 <th>상품 수량</th>
                 <th>상태</th>
+                <th>배송번호</th>
+                <th>배송상태</th>
                 <th></th>
                 <th>일시</th>
             </tr>
@@ -47,37 +49,59 @@
                 <td th:text="${order.orderItems[0].itemPrice}"></td>
                 <td th:text="${order.orderItems[0].itemCount}"></td>
                 <td th:text="${order.orderItems[0].itemStatus}"></td>
+                <td th:text="${order.orderItems[0].deliveryId}"></td>
                 <td>
-                    <a th:if="${order.orderItems[0].itemStatus.name() == 'ORDER'}" href="#"
-                       th:href="'javascript:cancel('+${order.id}+')'"
-                       class="btn btn-danger">CANCEL</a>
-                    <a th:if="${order.orderItems[0].itemStatus.name() == 'ORDER'}" href="#"
-                       th:href="'javascript:fixOrder('+${order.id}+')'"
-                       class="btn btn-dark">주문할당</a>
-                    <a th:if="${order.orderItems[0].itemStatus.name() == 'ORDER_FIX'}" href="#"
-                       th:href="'javascript:finishOrder('+${order.id}+')'"
+                    <span th:text="${order.orderItems[0].deliveryStatus}"></span>
+                    <a th:if="${order.orderItems[0].deliveryStatus!=null&&order.orderItems[0].deliveryStatus.name() == 'FIX'}" href="#"
+                       th:href="'javascript:finishDelivery('+${order.orderItems[0].deliveryId}+')'"
                        class="btn btn-dark">배송완료</a>
+                </td>
+                <td th:rowspan="${#lists.size(order.orderItems)}">
+                    <th:block th:if="${order.orderStatus.name()=='ORDER'&&!order.deliveryFlag}"> <!--초기 order-->
+                        <a href="#" class="btn btn-danger" onclick="alert('개발중입니다.');">CANCEL</a>
+                        <a href="#" th:href="'javascript:fixOrder('+${order.id}+')'"
+                           class="btn btn-dark">주문할당</a>
+                    </th:block>
+                    <th:block th:if="${order.orderStatus.name()=='ORDER'&&order.deliveryFlag}"> <!--일부할당-->
+                        <a href="#" class="btn btn-danger" onclick="alert('개발중입니다.');">CANCEL</a>
+                        <a href="#" th:href="'javascript:fixOrder('+${order.id}+')'"
+                           class="btn btn-dark">미할당건 할당</a>
+                        <a href="#" th:href="'javascript:fixDelivery('+${order.id}+')'"
+                           class="btn btn-dark">일부할당건 확정처리</a>
+                    </th:block>
+                    <th:block th:if="${order.orderStatus.name()=='ORDER_FIX'&&order.deliveryFlag}"> <!--오더확정-->
+<!--                        <a href="#"-->
+<!--                           th:href="'javascript:finishOrder('+${order.id}+')'"-->
+<!--                           class="btn btn-dark">배송완료</a>-->
+                    </th:block>
                 </td>
                 <td th:rowspan="${#lists.size(order.orderItems)}" th:text="${order.regdate}"></td>
 
             </tr>
                 <th:block th:each="num : ${#numbers.sequence(1,#lists.size(order.orderItems)-1)}">
                     <tr style="background-color: #f8f9fa !important;">
-                    <td th:text="${order.orderItems[num].item.name}"></td>
-                    <td th:text="${order.orderItems[num].itemPrice}"></td>
-                    <td th:text="${order.orderItems[num].itemCount}"></td>
-                    <td th:text="${order.orderItems[num].itemStatus}"></td>
-                    <td>
-                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER'}" href="#"
-                           th:href="'javascript:cancel('+${order.id}+')'"
-                           class="btn btn-danger">CANCEL</a>
-                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER'}" href="#"
-                           th:href="'javascript:fixOrder('+${order.id}+')'"
-                           class="btn btn-dark">주문할당</a>
-                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER_FIX'}" href="#"
-                           th:href="'javascript:finishOrder('+${order.id}+')'"
-                           class="btn btn-dark">배송완료</a>
-                    </td>
+                        <td th:text="${order.orderItems[num].item.name}"></td>
+                        <td th:text="${order.orderItems[num].itemPrice}"></td>
+                        <td th:text="${order.orderItems[num].itemCount}"></td>
+                        <td th:text="${order.orderItems[num].itemStatus}"></td>
+                        <td th:text="${order.orderItems[num].deliveryId}"></td>
+                        <td>
+                           <span th:text="${order.orderItems[num].deliveryStatus}"></span>
+                            <a th:if="${order.orderItems[num].deliveryStatus!=null&&order.orderItems[num].deliveryStatus.name() == 'FIX'}" href="#"
+                               th:href="'javascript:finishDelivery('+${order.orderItems[num].deliveryId}+')'"
+                               class="btn btn-dark">배송완료</a>
+                        </td>
+<!--                    <td>-->
+<!--                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER'}" href="#"-->
+<!--                           th:href="'javascript:cancel('+${order.id}+')'"-->
+<!--                           class="btn btn-danger">CANCEL</a>-->
+<!--                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER'}" href="#"-->
+<!--                           th:href="'javascript:fixOrder('+${order.id}+')'"-->
+<!--                           class="btn btn-dark">주문할당</a>-->
+<!--                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER_FIX'}" href="#"-->
+<!--                           th:href="'javascript:finishOrder('+${order.id}+')'"-->
+<!--                           class="btn btn-dark">배송완료</a>-->
+<!--                    </td>-->
                     </tr>
                 </th:block>
             </th:block>
@@ -114,6 +138,36 @@
         $.ajax({
             type: "POST",
             url: "/order/"+id+"/finish"
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert(data.message)
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
+    function fixDelivery(id){
+        $.ajax({
+            type: "POST",
+            url: "/order/"+id+"/deliveryFix"
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert(data.message)
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
+    function finishDelivery(id){
+        $.ajax({
+            type: "POST",
+            url: "/delivery/"+id+"/finish"
         }).done(function (data) {
             if (data.result) {
                 alert("성공하였습니다.");

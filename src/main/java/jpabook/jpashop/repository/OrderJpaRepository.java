@@ -17,6 +17,10 @@ public interface OrderJpaRepository extends JpaRepository<Order,Long> {
     List<Order> findAllByItemAndStatus(@Param("product") Item product,@Param("status") OrderStatus status);
 
     @Override
-    @EntityGraph(attributePaths = {"account","member"})
+    @EntityGraph(attributePaths = {"account","member","deliveries"})
     List<Order> findAll();
+
+
+    @Query("select o from Order o left join o.deliveries d group by o.deliveries ")
+    List<Order> findGroupByDelivery();
 }

@@ -76,4 +76,10 @@ public class OrderController {
         return orderService.finishOrder(orderId);
     }
 
+    @PostMapping("/order/{orderId}/deliveryFix")
+    @ResponseBody
+    private ResultResDataDto fixDelivery(@PathVariable("orderId") Long orderId){
+        return orderService.fixDelivery(orderId);
+    }
+
 }
