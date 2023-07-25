@@ -3,7 +3,6 @@ package jpabook.jpashop.controller;
 import jakarta.validation.Valid;
 import jpabook.jpashop.domain.Account;
 import jpabook.jpashop.domain.Member;
-import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderForm;
@@ -16,6 +15,7 @@ import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,11 +59,6 @@ public class OrderController {
         return "order/orderList";
     }
 
-    @PostMapping("/orders/{orderId}/cancel")
-    private String cancelOrder(@PathVariable("orderId") Long orderId){
-        orderService.cancelOrder(orderId);
-        return "redirect:/orders";
-    }
     @PostMapping("/order/{orderId}/fix")
     @ResponseBody
     private ResultResDataDto fixOrder(@PathVariable("orderId") Long orderId){
@@ -80,6 +75,20 @@ public class OrderController {
     @ResponseBody
     private ResultResDataDto fixDelivery(@PathVariable("orderId") Long orderId){
         return orderService.fixDelivery(orderId);
+    }
+    @PostMapping("/orders/{orderId}/cancel")
+    private String cancelOrder(@PathVariable("orderId") Long orderId){
+        orderService.cancelOrder(orderId);
+        return "redirect:/orders";
+    }
+    @PostMapping("/order/{orderId}/cancel")
+    @ResponseBody
+    private ResultResDataDto cancelOrderNew(@PathVariable("orderId") Long orderId,@RequestParam(value = "mode",required = false) String mode){
+        if(StringUtils.isEmpty(mode)||mode.equals("")){  //할당전취소
+            return orderService.cancelOrder(orderId);
+        }else {
+            return orderService.cancelFixOrder(orderId,mode);
+        }
     }
 
 }

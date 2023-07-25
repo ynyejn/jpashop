@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import nonapi.io.github.classgraph.classpath.ClasspathOrder;
 import org.aspectj.weaver.ast.Or;
 import org.hibernate.annotations.BatchSize;
 
@@ -44,6 +45,7 @@ public class Delivery {
         for (DeliveryItem deliveryItem:deliveryItems){
             delivery.addDeliveryItem(deliveryItem);
         }
+        order.addDelivery(delivery);
         return delivery;
     }
     public static Delivery createReturnDelivery(Order order, List<DeliveryItem> deliveryItems){
@@ -60,7 +62,12 @@ public class Delivery {
         deliveryItem.setDelivery(this);
     }
 
-//    public void addOrderItem(OrderItem orderItem) {
-//        this.orderItems.add(orderItem);
+    public void cancel(){
+
+    }
+
+//    public void delivery(){
+//        this.status = DeliveryStatus.FIX;
+//        this.order.setStatus(OrderStatus.ORDER_FIX);
 //    }
 }

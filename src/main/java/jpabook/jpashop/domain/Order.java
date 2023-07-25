@@ -52,6 +52,9 @@ public class Order {
         orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
+    public void addDelivery(Delivery delivery){  //연관관계 편의메소드의 위치는 핵심적으로 컨트롤 하는쪽이 들고있는게 좋음
+        deliveries.add(delivery);
+    }
 //    public void setDelivery(Delivery delivery){
 //        this.delivery = delivery;
 //        delivery.setOrder(this);
@@ -75,8 +78,10 @@ public class Order {
     //======비즈니스로직======//
     /**
      * 주문 취소
+     *
+     * @return
      */
-    public void cancel(){
+    public Order cancel(){
 //        if(delivery.getStatus()==DeliveryStatus.COMP){//배송완료
 //            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
 //        }
@@ -84,6 +89,29 @@ public class Order {
         for (OrderItem orderItem:orderItems){
             orderItem.cancel();
         }
+        return this;
+    }
+    public void notAllocatedCancel(){
+//        if(delivery.getStatus()==DeliveryStatus.COMP){//배송완료
+//            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
+//        }
+//        this.setStatus(OrderStatus.CANCEL);
+        for (OrderItem orderItem:orderItems){
+            if(orderItem.getStatus()==OrderItemStatus.ORDER){
+                orderItem.cancel();
+            }
+        }
+        fixDeliveries();
+    }
+    public void fixDeliveries(){
+        for (Delivery delivery : deliveries) {
+            if(delivery.getStatus()==DeliveryStatus.READY){
+                delivery.setStatus(DeliveryStatus.FIX);
+                System.out.println("여기들어오나여..?");
+            }
+            System.out.println("dld");
+        }
+        this.status = OrderStatus.ORDER_FIX;
     }
 
     //======조회로직======//

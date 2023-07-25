@@ -77,12 +77,19 @@ public class OrderService {
      * 주문 취소
      */
     @Transactional
-    public void cancelOrder(Long orderId){
-        //주문 엔티티 조회
-        Order order = orderRepository.findOne(orderId);
-        //주문 취소
-        order.cancel();
+    public ResultResDataDto cancelOrder(Long orderId){
+        try {
+            //주문 엔티티 조회
+            Order order = orderRepository.findOne(orderId);
+            //주문 취소
+            order.cancel();
+            return ResultResDataDto.fromResMsg(true, "성공");
+        }catch (Exception e){
+            throw e;
+        }
+
     }
+
 
     //검색
     public List<OrderDto> searchOrder(OrderSearch orderSearch){
@@ -124,4 +131,24 @@ public class OrderService {
         return stockService.fixDelivery(order);
     }
 
+
+    @Transactional
+    public ResultResDataDto cancelFixOrder(Long orderId, String mode) {
+        try {
+            //주문 엔티티 조회
+            Order order = orderRepository.findOne(orderId);
+
+            //주문 취소
+            if(mode.equals("all")){
+                order = order.cancel();
+                stockService.cancelStock(order);
+            }else{  //일부할당건만 취소후 나머지확정해야됨
+                order.notAllocatedCancel();
+            }
+
+            return ResultResDataDto.fromResMsg(true, "성공");
+        }catch (Exception e){
+            throw e;
+        }
+    }
 }

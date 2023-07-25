@@ -11,6 +11,7 @@ import jpabook.jpashop.dto.ProductStockDto;
 import jpabook.jpashop.dto.ResultResDataDto;
 import jpabook.jpashop.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -35,20 +36,20 @@ public class StockService {
     private final ItemService itemService;
     private final AccountService accountService;
     private final DeliveryRepository deliveryRepository;
-    private final RedisTemplate<String,String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private String stockKeyPrefix = "stock:";
     private String finishKeyPrefix = "finish:";
 
 
     public List<ChannelStockListDto> findStocks() {
-        return stockListRepository.findAll().stream().map(cs->ChannelStockListDto
+        return stockListRepository.findAll().stream().map(cs -> ChannelStockListDto
                 .builder()
                 .id(cs.getId())
                 .accountName(cs.getAccount().getName())
                 .productName(cs.getItem().getName())
                 .stock(cs.getQty())
-                .usedStock(usedCount(getStockKey(stockKeyPrefix,cs.getAccount().getAccountCode(),cs.getItem().getProductCode())))
-                .finishedStock(usedCount(getStockKey(finishKeyPrefix,cs.getAccount().getAccountCode(),cs.getItem().getProductCode())))
+                .usedStock(usedCount(getStockKey(stockKeyPrefix, cs.getAccount().getAccountCode(), cs.getItem().getProductCode())))
+                .finishedStock(usedCount(getStockKey(finishKeyPrefix, cs.getAccount().getAccountCode(), cs.getItem().getProductCode())))
                 .status(cs.getChannelStock().getStatus())
                 .build()).collect(Collectors.toList());
     }
@@ -90,12 +91,12 @@ public class StockService {
 
 
                 //사용중재고 total 계산
-                ScanOptions scanOptions = ScanOptions.scanOptions().match(stockKeyPrefix+"*"+product.getProductCode()).count(500).build();
+                ScanOptions scanOptions = ScanOptions.scanOptions().match(stockKeyPrefix + "*" + product.getProductCode()).count(500).build();
                 Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
-                Long allUsedCount=0L;
-                while (keys.hasNext()){
+                Long allUsedCount = 0L;
+                while (keys.hasNext()) {
                     String key = new String(keys.next());
-                    allUsedCount+=usedCount(key);
+                    allUsedCount += usedCount(key);
                 }
 
                 //channelStock
@@ -110,21 +111,21 @@ public class StockService {
 
                     ChannelStockList channelStockList = null;
                     Account account = distributionRate.getAccount();
-                    double rate = distributionRate.getRate() / (double)100;
-                    Long stock = Math.round((allStock-allStockRemainder-allUsedCount) * rate) + usedCount(getStockKey(stockKeyPrefix,account.getAccountCode(),product.getProductCode()));
-                    if(remainderStock>0){
+                    double rate = distributionRate.getRate() / (double) 100;
+                    Long stock = Math.round((allStock - allStockRemainder - allUsedCount) * rate) + usedCount(getStockKey(stockKeyPrefix, account.getAccountCode(), product.getProductCode()));
+                    if (remainderStock > 0) {
                         stock++;
                         remainderStock--;
                     }
-                    Optional<ChannelStockList> channelStockListOptional = stockListRepository.findByAccountAndItem(account,product);
-                    if(channelStockListOptional.isEmpty()){ //기존값 없을경우
+                    Optional<ChannelStockList> channelStockListOptional = stockListRepository.findByAccountAndItem(account, product);
+                    if (channelStockListOptional.isEmpty()) { //기존값 없을경우
                         channelStockList = new ChannelStockList();
                         channelStockList.setChannelStock(channelStock);
                         channelStockList.setSapStock(sapStock);
                         channelStockList.setQty(stock);
                         channelStockList.setAccount(account);
                         channelStockList.setItem(product);
-                    }else{
+                    } else {
                         channelStockList = channelStockListOptional.get();
                         channelStockList.setChannelStock(channelStock);
                         channelStockList.setSapStock(sapStock);
@@ -136,9 +137,9 @@ public class StockService {
             }
             //완료재고삭제
             //사용중재고 total 계산
-            ScanOptions scanOptions = ScanOptions.scanOptions().match(finishKeyPrefix+"*").count(500).build();
+            ScanOptions scanOptions = ScanOptions.scanOptions().match(finishKeyPrefix + "*").count(500).build();
             Cursor<byte[]> keys = redisTemplate.getConnectionFactory().getConnection().scan(scanOptions);
-            while (keys.hasNext()){
+            while (keys.hasNext()) {
                 String key = new String(keys.next());
                 delOnRedis(key);
             }
@@ -154,7 +155,6 @@ public class StockService {
     }
 
 
-
     @Transactional
     public ResultResDataDto redistributeStock() {   //사용안함
         try {
@@ -163,7 +163,7 @@ public class StockService {
 
             if (sapStocks.isEmpty()) {
                 List<ProductStockDto> stockDtos = stockListRepository.findAllStockGroupByProduct()
-                        .stream().map(s->ProductStockDto.builder()
+                        .stream().map(s -> ProductStockDto.builder()
                                 .productCode(s.getProductCode())
                                 .stock(s.getStock()).build()).collect(Collectors.toList());
                 for (ProductStockDto stockDto : stockDtos) {
@@ -200,7 +200,7 @@ public class StockService {
     public ResultResDataDto fixStock(Order tmpOrder) {
         try {
             Optional<Order> optionalOrder = orderRepository.findById(tmpOrder.getId());
-            if(!optionalOrder.isEmpty()){
+            if (!optionalOrder.isEmpty()) {
                 Order order = optionalOrder.get();
                 String accountCode = order.getAccount().getAccountCode();
                 List<OrderItem> orderItemList = order.getOrderItems();
@@ -209,11 +209,11 @@ public class StockService {
                 //오더아이템들 재고 확인하여 할당 작업
                 for (OrderItem orderItem : orderItemList) {
                     System.out.println("지");
-                    if(orderItem.getStatus()!=OrderItemStatus.ORDER){
+                    if (orderItem.getStatus() != OrderItemStatus.ORDER) {
                         continue;
                     }
                     Long count = orderItem.getCount();
-                    System.out.println(count+"여기들어옴");
+                    System.out.println(count + "여기들어옴");
                     String productCode = orderItem.getItem().getProductCode();
                     //findBy해서 account 랑 item으로 하는것으로 수정하자
                     Optional<ChannelStockList> checkStock = stockListRepository.checkStock(accountCode, productCode, count);
@@ -221,7 +221,7 @@ public class StockService {
                         //--------------조회시 다른 트랙잭션에서 조회 불가하도록 lock 시작--------------
                         ChannelStockList channelStockList = stockListRepository.findPessimisticById(checkStock.get().getId());
                         Long avail = availableStock(channelStockList.getId());
-                        if(avail-count>=0){
+                        if (avail - count >= 0) {
                             //할당로직
                             System.out.println(orderItem.getId());
                             orderItem.fixOrderItem();
@@ -233,10 +233,10 @@ public class StockService {
                             deliveryItemList.add(deliveryItem);
                             System.out.println("여기들오냐2");
                             //redis 추가
-                            String redisKey = getStockKey(stockKeyPrefix,accountCode,productCode);
+                            String redisKey = getStockKey(stockKeyPrefix, accountCode, productCode);
                             addOnRedis(redisKey, String.valueOf(orderItem.getId()));
 
-                        }else{
+                        } else {
                             System.out.println("여긴가444");
 //                            return ResultResDataDto.fromResMsg(false, "재고가 없어요");
                         }
@@ -245,32 +245,35 @@ public class StockService {
                     }
                 }
                 //전체 할당되었으면 delivery 확정처리
-                if(!deliveryItemList.isEmpty()){
-                    Optional<Delivery> optionalDelivery = deliveryRepository.findByOrderAndStatus(order,DeliveryStatus.READY);
+                if (!deliveryItemList.isEmpty()) {
+                    Optional<Delivery> optionalDelivery = deliveryRepository.findByOrderAndStatus(order, DeliveryStatus.READY);
                     Delivery delivery = null;
 
                     //재할당하는경우와 초기할당의 경우 분리
-                    if(optionalDelivery.isEmpty()){
-                        delivery = Delivery.createDelivery(order,deliveryItemList);
-                    }else{
+                    if (optionalDelivery.isEmpty()) {
+                        delivery = Delivery.createDelivery(order, deliveryItemList);
+                    } else {
                         delivery = optionalDelivery.get();
                         for (DeliveryItem deliveryItem : deliveryItemList) {
                             delivery.addDeliveryItem(deliveryItem);
                         }
                     }
-
-                    if(checkAllocatedStock(orderItemList)){
-                        System.out.println("다확정됨");
-                        delivery.setStatus(DeliveryStatus.FIX);
-                        order.setStatus(OrderStatus.ORDER_FIX);
-                    }
                     deliveryRepository.save(delivery);
                     orderRepository.save(order);
+                    //할당시 전부할당됐으면 delivery처리
+                    if (checkAllocatedStock(order)) {
+                        System.out.println("요긔긔");
+                        order.fixDeliveries();
+                    }else{
+                        System.out.println("요긔2");
+                    }
+                    deliveryRepository.save(delivery);
+
                     return ResultResDataDto.fromResMsg(true, "성공");
-                }else{
+                } else {
                     return ResultResDataDto.fromResMsg(false, "할당된거없슴");
                 }
-            }else {
+            } else {
                 return ResultResDataDto.fromResMsg(false, "오더가없슴");
             }
 
@@ -282,37 +285,42 @@ public class StockService {
         }
     }
 
-    private boolean checkAllocatedStock(List<OrderItem> orderItemList) {
+    private boolean checkAllocatedStock(Order order) {
         boolean check = true;
+        List<OrderItem> orderItemList = order.getOrderItems();
         for (OrderItem orderItem : orderItemList) {
-            if(orderItem.getStatus()==OrderItemStatus.ORDER){
+            if (orderItem.getStatus() == OrderItemStatus.ORDER) {
                 check = false;
             }
         }
         return check;
     }
 
-    public Long availableStock(Long key){
+    public Long availableStock(Long key) {
         ChannelStockList channelStockList = stockListRepository.findById(key).get();
         Long allStock = channelStockList.getQty();
-        String redisKey = getStockKey(stockKeyPrefix,channelStockList.getAccount().getAccountCode(),channelStockList.getItem().getProductCode());
+        String redisKey = getStockKey(stockKeyPrefix, channelStockList.getAccount().getAccountCode(), channelStockList.getItem().getProductCode());
         Long usedStock = usedCount(redisKey);
-        return allStock-usedStock;
+        return allStock - usedStock;
     }
 
-    public Long usedCount(String key){
+    public Long usedCount(String key) {
         return redisTemplate.opsForSet().size(key);
     }
-    public void addOnRedis(String key,String value){
+
+    public void addOnRedis(String key, String value) {
         Long addSiz = redisTemplate.opsForSet().add(key, value);
     }
+
     private void delOnRedis(String key) {
         Boolean delete = redisTemplate.delete(key);
     }
-    public void delOnRedis(String key,String value){
-        Long remove = redisTemplate.opsForSet().remove(key,value);
+
+    public void delOnRedis(String key, String value) {
+        Long remove = redisTemplate.opsForSet().remove(key, value);
     }
-    private String generateKey(Long key){
+
+    private String generateKey(Long key) {
         return key.toString();
     }
 
@@ -322,13 +330,13 @@ public class StockService {
             Long count = order.getOrderItems().get(0).getCount();
             String accountCode = order.getAccount().getAccountCode();
             String productCode = order.getOrderItems().get(0).getItem().getProductCode();
-            String redisFinishKey = getStockKey(finishKeyPrefix,accountCode,productCode);
-            String redisKey = getStockKey(stockKeyPrefix,accountCode,productCode);
-            delOnRedis(redisKey,String.valueOf(order.getId())+1);
-            addOnRedis(redisFinishKey, String.valueOf(order.getId())+1);
+            String redisFinishKey = getStockKey(finishKeyPrefix, accountCode, productCode);
+            String redisKey = getStockKey(stockKeyPrefix, accountCode, productCode);
+            delOnRedis(redisKey, String.valueOf(order.getId()) + 1);
+            addOnRedis(redisFinishKey, String.valueOf(order.getId()) + 1);
 
             return ResultResDataDto.fromResMsg(true, "성공");
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResultResDataDto.fromResMsg(false, "실패");
         }
     }
@@ -336,15 +344,15 @@ public class StockService {
     @Transactional
     public ResultResDataDto fixDelivery(Order order) {
         try {
-            Optional<Delivery> optionalDelivery = deliveryRepository.findByOrderAndStatus(order,DeliveryStatus.READY);
-            if(!optionalDelivery.isEmpty()){
+            Optional<Delivery> optionalDelivery = deliveryRepository.findByOrderAndStatus(order, DeliveryStatus.READY);
+            if (!optionalDelivery.isEmpty()) {
                 Delivery delivery = optionalDelivery.get();
                 delivery.setStatus(DeliveryStatus.FIX);
                 return ResultResDataDto.fromResMsg(true, "성공");
-            }else {
+            } else {
                 return ResultResDataDto.fromResMsg(false, "일부할당할게 없어영");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
@@ -353,7 +361,7 @@ public class StockService {
     public ResultResDataDto finishDelivery(Delivery tmpDelivery) {
         try {
             Optional<Delivery> optionalDelivery = deliveryRepository.findById(tmpDelivery.getId());
-            if(!optionalDelivery.isEmpty()){
+            if (!optionalDelivery.isEmpty()) {
                 Delivery delivery = optionalDelivery.get();
                 Order order = delivery.getOrder();
                 String accountCode = order.getAccount().getAccountCode();
@@ -361,20 +369,29 @@ public class StockService {
                 List<DeliveryItem> deliveryItems = delivery.getDeliveryItems();
                 for (DeliveryItem deliveryItem : deliveryItems) {
                     String productCode = deliveryItem.getItem().getProductCode();
-                    String redisFinishKey =  getStockKey(finishKeyPrefix,accountCode,productCode);
-                    String redisKey = getStockKey(stockKeyPrefix,accountCode,productCode);
+                    String redisFinishKey = getStockKey(finishKeyPrefix, accountCode, productCode);
+                    String redisKey = getStockKey(stockKeyPrefix, accountCode, productCode);
                     delOnRedis(redisKey, String.valueOf(deliveryItem.getOrderItem().getId()));
                     addOnRedis(redisFinishKey, String.valueOf(deliveryItem.getOrderItem().getId()));
                 }
                 return ResultResDataDto.fromResMsg(true, "성공");
-            }else {
+            } else {
                 return ResultResDataDto.fromResMsg(false, "일부할당할게 없어영");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
-    private String getStockKey(String prefix,String accountCode, String productCode) {
-        return prefix +accountCode+":"+productCode;
+
+    private String getStockKey(String prefix, String accountCode, String productCode) {
+        return prefix + accountCode + ":" + productCode;
+    }
+
+    public void cancelStock(Order order) {
+        List<OrderItem> orderItemList = order.getOrderItems();
+        for (OrderItem orderItem : orderItemList) {
+            String redisKey = getStockKey(stockKeyPrefix, order.getAccount().getAccountCode(), orderItem.getItem().getProductCode());
+            delOnRedis(redisKey, String.valueOf(orderItem.getId()));
+        }
     }
 }

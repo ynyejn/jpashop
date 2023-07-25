@@ -55,15 +55,22 @@
                     <a th:if="${order.orderItems[0].deliveryStatus!=null&&order.orderItems[0].deliveryStatus.name() == 'FIX'}" href="#"
                        th:href="'javascript:finishDelivery('+${order.orderItems[0].deliveryId}+')'"
                        class="btn btn-dark">배송완료</a>
+                    <a th:if="${order.orderItems[0].deliveryStatus!=null&&order.orderItems[0].deliveryStatus.name() == 'COMP'}" href="#"
+                       th:href="'javascript:returnOrder('+${order.orderItems[0].deliveryId}+','+${order.orderItems[0].item.id}+')'"
+                       class="btn btn-dark">반품</a>
                 </td>
                 <td th:rowspan="${#lists.size(order.orderItems)}">
                     <th:block th:if="${order.orderStatus.name()=='ORDER'&&!order.deliveryFlag}"> <!--초기 order-->
-                        <a href="#" class="btn btn-danger" onclick="alert('개발중입니다.');">CANCEL</a>
+                        <a href="#" class="btn btn-danger"
+                           th:href="'javascript:cancel('+${order.id}+')'">CANCEL</a>
                         <a href="#" th:href="'javascript:fixOrder('+${order.id}+')'"
                            class="btn btn-dark">주문할당</a>
                     </th:block>
                     <th:block th:if="${order.orderStatus.name()=='ORDER'&&order.deliveryFlag}"> <!--일부할당-->
-                        <a href="#" class="btn btn-danger" onclick="alert('개발중입니다.');">CANCEL</a>
+                        <a href="#" class="btn btn-danger"
+                           th:href="'javascript:cancel('+${order.id}+',\'notAllocated\')'">미할당건 취소</a>
+                        <a href="#" class="btn btn-danger"
+                           th:href="'javascript:cancel('+${order.id}+',\'all\')'">전체 취소</a>
                         <a href="#" th:href="'javascript:fixOrder('+${order.id}+')'"
                            class="btn btn-dark">미할당건 할당</a>
                         <a href="#" th:href="'javascript:fixDelivery('+${order.id}+')'"
@@ -115,12 +122,28 @@
 </div> <!-- /container -->
 </body>
 <script>
-    function cancel(id) {
-        var form = document.createElement("form");
-        form.setAttribute("method", "post");
-        form.setAttribute("action", "/orders/" + id + "/cancel");
-        document.body.appendChild(form);
-        form.submit();
+    // function cancel(id) {
+    //     var form = document.createElement("form");
+    //     form.setAttribute("method", "post");
+    //     form.setAttribute("action", "/orders/" + id + "/cancel");
+    //     document.body.appendChild(form);
+    //     form.submit();
+    // }
+    function cancel(id,mode){
+        $.ajax({
+            type: "POST",
+            url: "/order/"+id+"/cancel",
+            data: {mode:mode}
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert(data.message)
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
     }
     function fixOrder(id){
         $.ajax({

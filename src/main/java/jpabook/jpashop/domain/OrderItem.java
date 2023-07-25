@@ -59,7 +59,7 @@ public class OrderItem {
 
     //비즈니스로직
     public void cancel() {
-
+        this.status = OrderItemStatus.CANCEL;
 //        getItem().addStock(count);
     }
 
