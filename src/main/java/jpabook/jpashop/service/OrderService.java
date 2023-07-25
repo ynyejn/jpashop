@@ -138,8 +138,17 @@ public class OrderService {
             //주문 엔티티 조회
             Order order = orderRepository.findOne(orderId);
 
+
             //주문 취소
             if(mode.equals("all")){
+                //delivery 확인
+                List<Delivery> deliveries = order.getDeliveries();
+                for (Delivery delivery : deliveries) {
+                    if (delivery.getStatus()!=DeliveryStatus.READY){
+                        return ResultResDataDto.fromResMsg(false, "배송확정건은 전체취소할 수 없습니다.");
+                    }
+                }
+                //취소
                 order = order.cancel();
                 stockService.cancelStock(order);
             }else{  //일부할당건만 취소후 나머지확정해야됨
