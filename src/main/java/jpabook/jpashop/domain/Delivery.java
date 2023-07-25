@@ -46,6 +46,15 @@ public class Delivery {
         }
         return delivery;
     }
+    public static Delivery createReturnDelivery(Order order, List<DeliveryItem> deliveryItems){
+        Delivery delivery = new Delivery();
+        delivery.setStatus(DeliveryStatus.RETURN_ORDER);
+        delivery.setOrder(order);
+        for (DeliveryItem deliveryItem:deliveryItems){
+            delivery.addDeliveryItem(deliveryItem);
+        }
+        return delivery;
+    }
     public void addDeliveryItem(DeliveryItem deliveryItem){  //연관관계 편의메소드의 위치는 핵심적으로 컨트롤 하는쪽이 들고있는게 좋음
         deliveryItems.add(deliveryItem);
         deliveryItem.setDelivery(this);

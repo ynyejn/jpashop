@@ -19,4 +19,9 @@ public class DeliveryController {
     private ResultResDataDto finishDelivery(@PathVariable("deliveryId") Long deliveryId){
         return deliveryService.finishDelivery(deliveryId);
     }
+    @PostMapping("/delivery/{deliveryId}/{itemId}/return")
+    @ResponseBody
+    private ResultResDataDto returnDelivery(@PathVariable("deliveryId") Long deliveryId,@PathVariable("itemId") Long itemId){
+        return deliveryService.returnDelivery(deliveryId,itemId);
+    }
 }

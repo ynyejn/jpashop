@@ -90,6 +90,9 @@
                             <a th:if="${order.orderItems[num].deliveryStatus!=null&&order.orderItems[num].deliveryStatus.name() == 'FIX'}" href="#"
                                th:href="'javascript:finishDelivery('+${order.orderItems[num].deliveryId}+')'"
                                class="btn btn-dark">배송완료</a>
+                            <a th:if="${order.orderItems[num].deliveryStatus!=null&&order.orderItems[num].deliveryStatus.name() == 'COMP'}" href="#"
+                               th:href="'javascript:returnOrder('+${order.orderItems[num].deliveryId}+','+${order.orderItems[num].item.id}+')'"
+                               class="btn btn-dark">반품</a>
                         </td>
 <!--                    <td>-->
 <!--                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER'}" href="#"-->
@@ -168,6 +171,21 @@
         $.ajax({
             type: "POST",
             url: "/delivery/"+id+"/finish"
+        }).done(function (data) {
+            if (data.result) {
+                alert("성공하였습니다.");
+                location.reload();
+            } else {
+                alert(data.message)
+            }
+        }).fail(function (data) {
+            alert("조회에 실패하였습니다.");
+        });
+    }
+    function returnOrder(id,itemId){
+        $.ajax({
+            type: "POST",
+            url: "/delivery/"+id+"/"+itemId+"/return"
         }).done(function (data) {
             if (data.result) {
                 alert("성공하였습니다.");
