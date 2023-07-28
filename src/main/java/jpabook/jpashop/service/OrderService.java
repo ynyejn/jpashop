@@ -43,9 +43,9 @@ public class OrderService {
             Item item = itemRepository.findOne(itemDto.getItemId());
             itemList.add(item);
             //재고확인
-            if(!stockService.checkStock(account.getAccountCode(),item.getProductCode(),itemDto.getCount())){
-                throw new NotEnoughStockException("해당매장에 "+item.getName()+" 재고가 부족합니다.");
-            }
+//            if(!stockService.checkStock(account.getAccountCode(),item.getProductCode(),itemDto.getCount())){
+//                throw new NotEnoughStockException("해당매장에 "+item.getName()+" 재고가 부족합니다.");
+//            }
             for (int i = 0; i<itemDto.getCount();i++){
                 OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), 1L);
                 orderItemList.add(orderItem);

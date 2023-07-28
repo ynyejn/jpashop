@@ -58,6 +58,9 @@
                     <a th:if="${order.orderItems[0].deliveryStatus!=null&&order.orderItems[0].deliveryStatus.name() == 'COMP'}" href="#"
                        th:href="'javascript:returnOrder('+${order.orderItems[0].deliveryId}+','+${order.orderItems[0].item.id}+')'"
                        class="btn btn-dark">반품</a>
+                    <a th:if="${order.orderItems[0].deliveryStatus!=null&&order.orderItems[0].deliveryStatus.name() == 'COMP'}" href="#"
+                       th:href="'javascript:exchangeOrder('+${order.orderItems[0].deliveryId}+','+${order.orderItems[0].item.id}+')'"
+                       class="btn btn-dark">교환</a>
                 </td>
                 <td th:rowspan="${#lists.size(order.orderItems)}">
                     <th:block th:if="${order.orderStatus.name()=='ORDER'&&!order.deliveryFlag}"> <!--초기 order-->
@@ -85,7 +88,7 @@
                 <td th:rowspan="${#lists.size(order.orderItems)}" th:text="${order.regdate}"></td>
 
             </tr>
-                <th:block th:each="num : ${#numbers.sequence(1,#lists.size(order.orderItems)-1)}">
+                <th:block th:each="num : ${#numbers.sequence(1,#lists.size(order.orderItems)-1)}" th:if="${#lists.size(order.orderItems)>1}">
                     <tr style="background-color: #f8f9fa !important;">
                         <td th:text="${order.orderItems[num].item.name}"></td>
                         <td th:text="${order.orderItems[num].itemPrice}"></td>
@@ -100,6 +103,9 @@
                             <a th:if="${order.orderItems[num].deliveryStatus!=null&&order.orderItems[num].deliveryStatus.name() == 'COMP'}" href="#"
                                th:href="'javascript:returnOrder('+${order.orderItems[num].deliveryId}+','+${order.orderItems[num].item.id}+')'"
                                class="btn btn-dark">반품</a>
+                            <a th:if="${order.orderItems[num].deliveryStatus!=null&&order.orderItems[num].deliveryStatus.name() == 'COMP'}" href="#"
+                               th:href="'javascript:exchangeOrder('+${order.orderItems[num].deliveryId}+','+${order.orderItems[num].item.id}+')'"
+                               class="btn btn-dark">교환</a>
                         </td>
 <!--                    <td>-->
 <!--                        <a th:if="${order.orderItems[num].itemStatus.name() == 'ORDER'}" href="#"-->
