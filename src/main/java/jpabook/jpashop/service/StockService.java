@@ -297,11 +297,17 @@ public class StockService {
     }
 
     public Long availableStock(Long key) {
+        //재고수량
         ChannelStockList channelStockList = stockListRepository.findById(key).get();
         Long allStock = channelStockList.getQty();
+        //사용중수량
         String redisKey = getStockKey(stockKeyPrefix, channelStockList.getAccount().getAccountCode(), channelStockList.getItem().getProductCode());
         Long usedStock = usedCount(redisKey);
-        return allStock - usedStock;
+        //배송완료수량
+        String redisfinishKey = getStockKey(finishKeyPrefix, channelStockList.getAccount().getAccountCode(), channelStockList.getItem().getProductCode());
+        Long finishedStock = usedCount(redisfinishKey);
+
+        return allStock - usedStock -finishedStock;
     }
 
     public Long usedCount(String key) {
